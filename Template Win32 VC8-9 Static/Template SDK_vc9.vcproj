@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
-	Name="Template SDK"
+	Version="9,00"
+	Name="Wiimote"
 	ProjectGUID="{E4FC0DEC-403B-44D0-8B45-6AC365B15CE2}"
 	RootNamespace="Sprite"
 	Keyword="MFCProj"
@@ -87,6 +87,7 @@
 				OutputFile="..\..\IDE\Plugins\Template.csx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="c:\WinDDK\7600.16385.0\lib\win7\i386"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="atlmincrt.lib"
 				ModuleDefinitionFile=".\ConstructSDK.def"
@@ -198,6 +199,7 @@
 				OutputFile="..\..\IDE\Plugins\Runtime\Template.csx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="c:\WinDDK\7600.16385.0\lib\win7\i386"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="atlmincrt.lib"
 				ModuleDefinitionFile=".\ConstructSDKRun.def"
@@ -301,6 +303,7 @@
 				OutputFile="..\..\IDE\Plugins\Template.csx"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="c:\WinDDK\7600.16385.0\lib\win7\i386"
 				ModuleDefinitionFile=".\ConstructSDK.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="Debug/ConstructSDK.pdb"
@@ -400,6 +403,7 @@
 				OutputFile="..\..\IDE\Plugins\Runtime\Template.csx"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="c:\WinDDK\7600.16385.0\lib\win7\i386"
 				ModuleDefinitionFile=".\ConstructSDKRun.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="Debug_Runtime/ConstructSDK.pdb"
@@ -790,6 +794,26 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath="..\Wiiyourself\wiimote.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Runtime|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -809,6 +833,14 @@
 			</File>
 			<File
 				RelativePath="StdAfx.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Wiiyourself\wiimote.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Wiiyourself\wiimote_state.h"
 				>
 			</File>
 		</Filter>
@@ -833,7 +865,7 @@
 				>
 			</File>
 			<File
-				RelativePath="res\ICON.BMP"
+				RelativePath="ICON.BMP"
 				>
 				<FileConfiguration
 					Name="Runtime|Win32"
@@ -845,7 +877,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ICON.BMP"
+				RelativePath="res\ICON.BMP"
 				>
 				<FileConfiguration
 					Name="Runtime|Win32"
