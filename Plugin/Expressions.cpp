@@ -31,3 +31,8 @@ long ExtObject::eMyExpression(LPVAL params, ExpReturn& ret)
 	// Use ret.ReturnString() for strings.
 	return ret = 0;
 }
+
+long ExtObject::eBatteryPercent(LPVAL params, ExpReturn& ret)
+{
+	return ret = remote.BatteryPercent;
+}

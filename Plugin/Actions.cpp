@@ -14,3 +14,9 @@ long ExtObject::aMyAction(LPVAL params)
 	return 0;
 }
 
+long ExtObject::aDisconnect(LPVAL params)
+{
+	remote.Disconnect();
+	return 0;
+}
+

@@ -19,9 +19,11 @@
 //OF_NOCOMMONDEBUG - Don't show 'Common' field (X/Y/W/H/Angle/Opacity) in debugger
 //OF_NODEBUG - Don't show at all in debugger
 //OF_UNDEFINEDEXPRESSIONS - Allow ReturnUndefinedExpression to be called
-#define IDE_FLAGS 	OF_NOCOMMONDEBUG
+#define IDE_FLAGS 	OF_NOCOMMONDEBUG | OF_NODRAW
 
 #include "..\Common\ExpReturn.hpp"
+
+#include "..\Wiiyourself\wiimote.h"
 
 #define OBJECTRECT CRect(editObject->objectX, editObject->objectY, editObject->objectX + editObject->objectWidth, editObject->objectY + editObject->objectHeight)
 
@@ -32,6 +34,7 @@
 class ExtObject : public CRunObject
 {
 public:
+	wiimote remote;
 	// Constructor (called when Construct creates the object)
 	ExtObject(initialObject* editObject, VRuntime* pVRuntime);
 	// Destructor (called when Construct destroys the object)
@@ -71,9 +74,19 @@ public:
 
 	long cMyCondition(LPVAL params);
 
+	long cConnected(LPVAL params);
+	long cConnectionLost(LPVAL params);
+
+	long cButtonPressed(LPVAL params);
+
 	long aMyAction(LPVAL params);
 
+	long aConnect(LPVAL params);
+	long aDisconnect(LPVAL params);
+
 	long eMyExpression(LPVAL params, ExpReturn& ret);
+
+	long eBatteryPercent(LPVAL params, ExpReturn& ret);
 
 	////////////////////////////////////////////////////
 	// Data members

@@ -26,6 +26,9 @@ void DefineACES(MicroAceTime* at)
 	// ADDCND(List name, Category, Display string, Function address, Script name, Flags)
 	ADDCND("My condition", "My category", "%o My condition", &ExtObject::cMyCondition, "MyCondition", 0);
 
+	ADDPARAMCOMBO("Button", "Button pressed", "A|B|1|2|Home|Up|Down|Left|Right");
+	ADDCND("Button pressed", "Buttons", "%0 pressed", &ExtObject::cButtonPressed, "ButtonPressed", 0);
+
 	/////////////////////////////
 	// Actions
 	// Format:
@@ -33,10 +36,13 @@ void DefineACES(MicroAceTime* at)
 	ADDPARAM(PARAM_VALUE, "Example parameter", "Here is an example parameter.");
 	ADDACT("My action", "My category", "Example action (%0)", &ExtObject::aMyAction, "MyAction", 0);
 
+	ADDACT("Disconnect", "Connection", "Disconnect remote", &ExtObject::aDisconnect, "Disconnect", 0);
+
 	/////////////////////////////
 	// Expressions
 	// ADDEXP(List name, Category, Display string, Function address, Flags)
 	ADDEXP("My expression", "My category", "MyExpression", &ExtObject::eMyExpression, RETURN_INTEGER);
+	ADDEXP("Battery level", "Status", "BatteryLevel", &ExtObject::eBatteryPercent, RETURN_INTEGER);
 
 	// This line includes your common ACEs as specified in Main.h
 #include "..\Common\CommonAceTable.hpp"
