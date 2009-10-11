@@ -66,16 +66,16 @@ END
 
 STRINGTABLE 
 BEGIN
-    OBJ_NAME                "Template"
-    OBJ_AUTHOR              "Construct Team"
+    OBJ_NAME                "Wiimote"
+    OBJ_AUTHOR              "K. K."
     OBJ_VERSION             "1.00"
     OBJ_DESCRIPTION         "Template SDK object."
-    OBJ_DATE                "Jun 07"
-    OBJ_COPYRIGHT           "Copyright (C) Ashley Gullen, Scirra"
-    OBJ_WEB                 "www.scirra.com"
-    OBJ_EMAIL               "ashley@scirra.com"
+    OBJ_DATE                "Oct 09"
+    OBJ_COPYRIGHT           "No copyright"
+    OBJ_WEB                 "www.paahdin.com"
+    OBJ_EMAIL               "kimmo@paahdin.com"
     IDS_CATEGORY            "Game"
-    IDS_LICENSE             "Freeware"
+    IDS_LICENSE             "Do whatever you want"
 END
 
 #endif    // English (U.S.) resources
