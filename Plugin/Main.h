@@ -83,6 +83,7 @@ public:
 
 	long aConnect(LPVAL params);
 	long aDisconnect(LPVAL params);
+	long aSetRumble(LPVAL params);
 
 	long eMyExpression(LPVAL params, ExpReturn& ret);
 

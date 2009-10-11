@@ -26,3 +26,10 @@ long ExtObject::aDisconnect(LPVAL params)
 	return 0;
 }
 
+long ExtObject::aSetRumble(LPVAL params)
+{
+	bool mode = params[0].GetBool();
+	remote.SetRumble(mode);
+	return 0;
+}
+

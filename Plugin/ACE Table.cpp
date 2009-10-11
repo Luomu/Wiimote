@@ -26,11 +26,11 @@ void DefineACES(MicroAceTime* at)
 	// ADDCND(List name, Category, Display string, Function address, Script name, Flags)
 	ADDCND("My condition", "My category", "%o My condition", &ExtObject::cMyCondition, "MyCondition", 0);
 
-	ADDCND("Connected", "Connection", "Remote connected", &ExtObject::cConnected, "Connected", 0);
-	ADDCND("Connection lost", "Connection", "Connection lost", &ExtObject::cConnectionLost, "ConnectionLost", 0);
+	ADDCND("Connected", "Connection", "%o Remote connected", &ExtObject::cConnected, "Connected", 0);
+	ADDCND("Connection lost", "Connection", "%o Connection lost", &ExtObject::cConnectionLost, "ConnectionLost", 0);
 
-	ADDPARAMCOMBO("Button", "Button pressed", "A|B|1|2|Home|Up|Down|Left|Right");
-	ADDCND("Button pressed", "Buttons", "%0 pressed", &ExtObject::cButtonPressed, "ButtonPressed", 0);
+	ADDPARAMCOMBO("Button", "Remote button", "A|B|1|2|Home|Up|Down|Left|Right");
+	ADDCND("Button down", "Buttons", "%o %0 pressed", &ExtObject::cButtonPressed, "ButtonDown", 0);
 
 	/////////////////////////////
 	// Actions
@@ -41,6 +41,9 @@ void DefineACES(MicroAceTime* at)
 
 	ADDACT("Connect", "Connection", "Connect remote", &ExtObject::aConnect, "Connect", 0);
 	ADDACT("Disconnect", "Connection", "Disconnect remote", &ExtObject::aDisconnect, "Disconnect", 0);
+
+	ADDPARAMCOMBO("Rumble", "Turn rumble on or off", "On|Off", 0);
+	ADDACT("Set rumble", "Remote", "Set rumble %0", &ExtObject::aSetRumble, "SetRumble", 0);
 
 	/////////////////////////////
 	// Expressions
