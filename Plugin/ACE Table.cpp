@@ -26,6 +26,9 @@ void DefineACES(MicroAceTime* at)
 	// ADDCND(List name, Category, Display string, Function address, Script name, Flags)
 	ADDCND("My condition", "My category", "%o My condition", &ExtObject::cMyCondition, "MyCondition", 0);
 
+	ADDCND("Connected", "Connection", "Remote connected", &ExtObject::cConnected, "Connected", 0);
+	ADDCND("Connection lost", "Connection", "Connection lost", &ExtObject::cConnectionLost, "ConnectionLost", 0);
+
 	ADDPARAMCOMBO("Button", "Button pressed", "A|B|1|2|Home|Up|Down|Left|Right");
 	ADDCND("Button pressed", "Buttons", "%0 pressed", &ExtObject::cButtonPressed, "ButtonPressed", 0);
 
@@ -36,6 +39,7 @@ void DefineACES(MicroAceTime* at)
 	ADDPARAM(PARAM_VALUE, "Example parameter", "Here is an example parameter.");
 	ADDACT("My action", "My category", "Example action (%0)", &ExtObject::aMyAction, "MyAction", 0);
 
+	ADDACT("Connect", "Connection", "Connect remote", &ExtObject::aConnect, "Connect", 0);
 	ADDACT("Disconnect", "Connection", "Disconnect remote", &ExtObject::aDisconnect, "Disconnect", 0);
 
 	/////////////////////////////
