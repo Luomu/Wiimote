@@ -41,7 +41,7 @@ void DefineACES(MicroAceTime* at)
 	ADDACT("Connect", "Connection", "Connect remote", &ExtObject::aConnect, "Connect", 0);
 	ADDACT("Disconnect", "Connection", "Disconnect remote", &ExtObject::aDisconnect, "Disconnect", 0);
 
-	ADDPARAMCOMBO("Rumble", "Turn rumble off or on", "Off|On", 0);
+	ADDPARAMCOMBO("Rumble", "Turn rumble off or on", "Off|On");
 	ADDACT("Set rumble", "Remote", "Set rumble %0", &ExtObject::aSetRumble, "SetRumble", 0);
 
 	ADDPARAM(PARAM_VALUE, "Led 1", "0 = off, 1 = on.");

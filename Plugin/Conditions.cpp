@@ -23,10 +23,32 @@ long ExtObject::cButtonDown(LPVAL params)
 	if(!remote.IsConnected())
 		return false;
 
-	if(params[0].GetInt() == 0 && remote.Button.A())
-		return true;
+	return ButtonState(params[0].GetInt());
+}
 
-	if(params[0].GetInt() == 1 && remote.Button.B())
-		return true;
-	return false;
+BOOL ExtObject::ButtonState(int button)
+{
+	//"A|B|1|2|Home|Up|Down|Left|Right"
+	switch(button) {
+		case 0:
+			return remote.Button.A();
+		case 1:
+			return remote.Button.B();
+		case 2:
+			return remote.Button.One();
+		case 3:
+			return remote.Button.Two();
+		case 4:
+			return remote.Button.Home();
+		case 5:
+			return remote.Button.Up();
+		case 6:
+			return remote.Button.Down();
+		case 7:
+			return remote.Button.Left();
+		case 8:
+			return remote.Button.Right();
+		default:
+			return 0;
+	}
 }

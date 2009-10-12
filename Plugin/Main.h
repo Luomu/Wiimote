@@ -68,6 +68,8 @@ public:
 	void		DebuggerUpdateDisplay(ExpStore*& pPrivateVars);
 	void		OnDebuggerValueChanged(const char* name, const char* value);
 
+	BOOL		ButtonState(int button);
+
 	////////////////////////////////////////////////////
 	// ACTIONS, CONDITIONS AND EXPRESSIONS DEFINITIONS
 #include "..\Common\CommonAceDecl.hpp"
