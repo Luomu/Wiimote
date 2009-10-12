@@ -48,6 +48,10 @@ BOOL ExtObject::ButtonState(int button)
 			return remote.Button.Left();
 		case 8:
 			return remote.Button.Right();
+		case 9:
+			return remote.Button.Plus();
+		case 10:
+			return remote.Button.Minus();
 		default:
 			return 0;
 	}

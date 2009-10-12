@@ -39,3 +39,33 @@ long ExtObject::eRoll(LPVAL params, ExpReturn &ret)
 {
 	return ret = remote.Acceleration.Orientation.Roll;
 }
+
+long ExtObject::eOriX(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Acceleration.Orientation.X;
+}
+
+long ExtObject::eOriY(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Acceleration.Orientation.Y;
+}
+
+long ExtObject::eOriZ(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Acceleration.Orientation.Z;
+}
+
+long ExtObject::eAccX(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Acceleration.X;
+}
+
+long ExtObject::eAccY(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Acceleration.Y;
+}
+
+long ExtObject::eAccZ(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Acceleration.Z;
+}

@@ -28,7 +28,7 @@ void DefineACES(MicroAceTime* at)
 	ADDCND("Connected", "Connection", "%o Remote connected", &ExtObject::cConnected, "Connected", 0);
 	ADDCND("Connection lost", "Connection", "%o Connection lost", &ExtObject::cConnectionLost, "ConnectionLost", 0);
 
-	ADDPARAMCOMBO("Button", "Remote button", "A|B|1|2|Home|Up|Down|Left|Right");
+	ADDPARAMCOMBO("Button", "Remote button", "A|B|1|2|Home|Up|Down|Left|Right|Plus|Minus");
 	ADDCND("Button down", "Buttons", "%o %0 is down", &ExtObject::cButtonDown, "ButtonDown", 0);
 
 	/////////////////////////////
@@ -55,6 +55,12 @@ void DefineACES(MicroAceTime* at)
 	// ADDEXP(List name, Category, Display string, Function address, Flags)
 	ADDEXP("Pitch", "Orientation", "Pitch", &ExtObject::ePitch, RETURN_INTEGER);
 	ADDEXP("Roll", "Orientation", "Roll", &ExtObject::eRoll, RETURN_INTEGER);
+	ADDEXP("Orientation X", "Orientation", "OriX", &ExtObject::eOriX, RETURN_FLOAT);
+	ADDEXP("Orientation Y", "Orientation", "OriY", &ExtObject::eOriY, RETURN_FLOAT);
+	ADDEXP("Orientation Z", "Orientation", "OriZ", &ExtObject::eOriZ, RETURN_FLOAT);
+	ADDEXP("Acceleration Z", "Acceleration", "AccX", &ExtObject::eAccX, RETURN_FLOAT);
+	ADDEXP("Acceleration Y", "Acceleration", "AccY", &ExtObject::eAccY, RETURN_FLOAT);
+	ADDEXP("Acceleration Z", "Acceleration", "AccZ", &ExtObject::eAccZ, RETURN_FLOAT);
 	ADDEXP("Battery level", "Status", "BatteryLevel", &ExtObject::eBatteryPercent, RETURN_INTEGER);
 
 	// This line includes your common ACEs as specified in Main.h

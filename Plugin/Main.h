@@ -87,8 +87,16 @@ public:
 	long aSetLeds(LPVAL params);
 
 	long eBatteryPercent(LPVAL params, ExpReturn& ret);
+
+	long eAccX(LPVAL params, ExpReturn& ret);
+	long eAccY(LPVAL params, ExpReturn& ret);
+	long eAccZ(LPVAL params, ExpReturn& ret);
+
 	long ePitch(LPVAL params, ExpReturn& ret);
 	long eRoll(LPVAL params, ExpReturn& ret);
+	long eOriX(LPVAL params, ExpReturn& ret);
+	long eOriY(LPVAL params, ExpReturn& ret);
+	long eOriZ(LPVAL params, ExpReturn& ret);
 
 	////////////////////////////////////////////////////
 	// Data members
