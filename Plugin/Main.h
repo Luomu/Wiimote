@@ -84,8 +84,7 @@ public:
 	long aConnect(LPVAL params);
 	long aDisconnect(LPVAL params);
 	long aSetRumble(LPVAL params);
-
-	long eMyExpression(LPVAL params, ExpReturn& ret);
+	long aSetLeds(LPVAL params);
 
 	long eBatteryPercent(LPVAL params, ExpReturn& ret);
 

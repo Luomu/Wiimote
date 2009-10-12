@@ -17,6 +17,7 @@ long ExtObject::aMyAction(LPVAL params)
 long ExtObject::aConnect(LPVAL params)
 {
 	remote.Connect(wiimote::FIRST_AVAILABLE);
+	remote.SetLEDs(1);
 	return 0;
 }
 
@@ -29,7 +30,15 @@ long ExtObject::aDisconnect(LPVAL params)
 long ExtObject::aSetRumble(LPVAL params)
 {
 	bool mode = params[0].GetBool();
-	remote.SetRumble(mode);
+	if(remote.IsConnected())
+		remote.SetRumble(mode);
 	return 0;
 }
 
+long ExtObject::aSetLeds(LPVAL params)
+{
+	unsigned leds = 1 * params[0].GetBool() + 2 * params[1].GetBool() + 4 * params[2].GetBool() + 8 * params[3].GetBool();
+	if(remote.IsConnected())
+		remote.SetLEDs(leds);
+	return 0;
+}

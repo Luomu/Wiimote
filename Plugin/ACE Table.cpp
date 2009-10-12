@@ -42,13 +42,18 @@ void DefineACES(MicroAceTime* at)
 	ADDACT("Connect", "Connection", "Connect remote", &ExtObject::aConnect, "Connect", 0);
 	ADDACT("Disconnect", "Connection", "Disconnect remote", &ExtObject::aDisconnect, "Disconnect", 0);
 
-	ADDPARAMCOMBO("Rumble", "Turn rumble on or off", "On|Off", 0);
+	ADDPARAMCOMBO("Rumble", "Turn rumble on or off", "Off|On", 0);
 	ADDACT("Set rumble", "Remote", "Set rumble %0", &ExtObject::aSetRumble, "SetRumble", 0);
+
+	ADDPARAM(PARAM_VALUE, "Led 1", "0 = off, 1 = on.");
+	ADDPARAM(PARAM_VALUE, "Led 2", "0 = off, 1 = on.");
+	ADDPARAM(PARAM_VALUE, "Led 3", "0 = off, 1 = on.");
+	ADDPARAM(PARAM_VALUE, "Led 3", "0 = off, 1 = on.");
+	ADDACT("Set LEDs", "Remote", "Set LEDs to %0 %1 %2 %3", &ExtObject::aSetLeds, "SetLEDs", 0);
 
 	/////////////////////////////
 	// Expressions
 	// ADDEXP(List name, Category, Display string, Function address, Flags)
-	ADDEXP("My expression", "My category", "MyExpression", &ExtObject::eMyExpression, RETURN_INTEGER);
 	ADDEXP("Battery level", "Status", "BatteryLevel", &ExtObject::eBatteryPercent, RETURN_INTEGER);
 
 	// This line includes your common ACEs as specified in Main.h
