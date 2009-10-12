@@ -24,13 +24,12 @@ void DefineACES(MicroAceTime* at)
 	// Conditions
 	// Format:
 	// ADDCND(List name, Category, Display string, Function address, Script name, Flags)
-	ADDCND("My condition", "My category", "%o My condition", &ExtObject::cMyCondition, "MyCondition", 0);
 
 	ADDCND("Connected", "Connection", "%o Remote connected", &ExtObject::cConnected, "Connected", 0);
 	ADDCND("Connection lost", "Connection", "%o Connection lost", &ExtObject::cConnectionLost, "ConnectionLost", 0);
 
 	ADDPARAMCOMBO("Button", "Remote button", "A|B|1|2|Home|Up|Down|Left|Right");
-	ADDCND("Button down", "Buttons", "%o %0 pressed", &ExtObject::cButtonPressed, "ButtonDown", 0);
+	ADDCND("Button down", "Buttons", "%o %0 is down", &ExtObject::cButtonDown, "ButtonDown", 0);
 
 	/////////////////////////////
 	// Actions
@@ -42,7 +41,7 @@ void DefineACES(MicroAceTime* at)
 	ADDACT("Connect", "Connection", "Connect remote", &ExtObject::aConnect, "Connect", 0);
 	ADDACT("Disconnect", "Connection", "Disconnect remote", &ExtObject::aDisconnect, "Disconnect", 0);
 
-	ADDPARAMCOMBO("Rumble", "Turn rumble on or off", "Off|On", 0);
+	ADDPARAMCOMBO("Rumble", "Turn rumble off or on", "Off|On", 0);
 	ADDACT("Set rumble", "Remote", "Set rumble %0", &ExtObject::aSetRumble, "SetRumble", 0);
 
 	ADDPARAM(PARAM_VALUE, "Led 1", "0 = off, 1 = on.");
@@ -54,6 +53,8 @@ void DefineACES(MicroAceTime* at)
 	/////////////////////////////
 	// Expressions
 	// ADDEXP(List name, Category, Display string, Function address, Flags)
+	ADDEXP("Pitch", "Orientation", "Pitch", &ExtObject::ePitch, RETURN_INTEGER);
+	ADDEXP("Roll", "Orientation", "Roll", &ExtObject::eRoll, RETURN_INTEGER);
 	ADDEXP("Battery level", "Status", "BatteryLevel", &ExtObject::eBatteryPercent, RETURN_INTEGER);
 
 	// This line includes your common ACEs as specified in Main.h

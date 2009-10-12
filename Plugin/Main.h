@@ -72,12 +72,10 @@ public:
 	// ACTIONS, CONDITIONS AND EXPRESSIONS DEFINITIONS
 #include "..\Common\CommonAceDecl.hpp"
 
-	long cMyCondition(LPVAL params);
-
 	long cConnected(LPVAL params);
 	long cConnectionLost(LPVAL params);
 
-	long cButtonPressed(LPVAL params);
+	long cButtonDown(LPVAL params);
 
 	long aMyAction(LPVAL params);
 
@@ -87,6 +85,8 @@ public:
 	long aSetLeds(LPVAL params);
 
 	long eBatteryPercent(LPVAL params, ExpReturn& ret);
+	long ePitch(LPVAL params, ExpReturn& ret);
+	long eRoll(LPVAL params, ExpReturn& ret);
 
 	////////////////////////////////////////////////////
 	// Data members

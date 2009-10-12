@@ -5,15 +5,9 @@
 // Conditions
 //////////////////////////////////////////////////////////////////////////////////
 
-long ExtObject::cMyCondition(LPVAL params)
-{
-	// Always run
-	return true;
-}
-
 long ExtObject::cConnected(LPVAL params)
 {
-	return false;
+	return remote.IsConnected();
 }
 
 long ExtObject::cConnectionLost(LPVAL params)
@@ -24,7 +18,15 @@ long ExtObject::cConnectionLost(LPVAL params)
 		return false;
 }
 
-long ExtObject::cButtonPressed(LPVAL params)
+long ExtObject::cButtonDown(LPVAL params)
 {
+	if(!remote.IsConnected())
+		return false;
+
+	if(params[0].GetInt() == 0 && remote.Button.A())
+		return true;
+
+	if(params[0].GetInt() == 1 && remote.Button.B())
+		return true;
 	return false;
 }

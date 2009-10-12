@@ -300,7 +300,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="..\..\IDE\Plugins\Wiimote.csx"
+				OutputFile="C:\Program Files\Scirra\Construct995\Plugins\Wiimote.csx"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="c:\WinDDK\7600.16385.0\lib\win7\i386"

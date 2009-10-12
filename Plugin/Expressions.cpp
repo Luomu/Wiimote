@@ -29,3 +29,13 @@ long ExtObject::eBatteryPercent(LPVAL params, ExpReturn& ret)
 {
 	return ret = remote.BatteryPercent;
 }
+
+long ExtObject::ePitch(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Acceleration.Orientation.Pitch;
+}
+
+long ExtObject::eRoll(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Acceleration.Orientation.Roll;
+}

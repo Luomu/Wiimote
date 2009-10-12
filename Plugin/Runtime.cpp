@@ -58,7 +58,13 @@ ExtObject::~ExtObject()
 // Return 1 (do not call again) or 0 (continue calling)
 BOOL ExtObject::OnFrame()
 {
-	return 1;	// Do not call again
+	if(!remote.IsConnected())
+		return 0;
+
+	if(remote.RefreshState() == NO_CHANGE)
+		return 0;
+
+	return 0;	// Do not call again
 }
 
 // Called every frame, after the events and before drawing, for you to update your object if necessary

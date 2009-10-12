@@ -16,8 +16,10 @@ long ExtObject::aMyAction(LPVAL params)
 
 long ExtObject::aConnect(LPVAL params)
 {
-	remote.Connect(wiimote::FIRST_AVAILABLE);
-	remote.SetLEDs(1);
+	if(remote.Connect(wiimote::FIRST_AVAILABLE)) {
+		remote.SetLEDs(1);
+		remote.SetReportType(wiimote::IN_BUTTONS_ACCEL_IR);
+	}
 	return 0;
 }
 
