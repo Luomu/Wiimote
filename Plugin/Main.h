@@ -83,10 +83,12 @@ public:
 
 	long aConnect(LPVAL params);
 	long aDisconnect(LPVAL params);
+	long aSetReportType(LPVAL params);
 	long aSetRumble(LPVAL params);
 	long aSetLeds(LPVAL params);
 
 	long eBatteryPercent(LPVAL params, ExpReturn& ret);
+	long eIrState(LPVAL params, ExpReturn& ret);
 
 	long eAccX(LPVAL params, ExpReturn& ret);
 	long eAccY(LPVAL params, ExpReturn& ret);
@@ -133,7 +135,8 @@ public:
 	// Your edittime extension data goes here
 	int iTexture;		// DX texture
 
-	int myValue;
+	//int myValue;
+	int remoteNumber;
 };
 
 // Internal stuff include

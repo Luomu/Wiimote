@@ -23,7 +23,7 @@
 
 BEGIN_PROPERTY_TABLE();
 
-	PROPERTY_VALUE(myValue, "Test value", "This is a test PROPERTY_VALUE.");
+	PROPERTY_VALUE(remoteNumber, "Remote number", "Remote number (1-4)");
 
 END_PROPERTY_TABLE  ();
 
@@ -63,7 +63,7 @@ void EditExt::OnPropertiesUpdate()
 void EditExt::OnPut()
 {
 	// Default value for the property
-	myValue = 50;
+	remoteNumber = 1;
 
 	// Default object size
 	pInfo->objectWidth = 64;

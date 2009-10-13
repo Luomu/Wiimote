@@ -34,12 +34,14 @@ void EditExt::Serialize(bin& ar)
 
 	if (ar.loading) {
 
-		ar >> myValue;
+		//ar >> myValue;
+		ar >> remoteNumber;
 
 	}
 	else {
 		
-		ar << myValue;
+		//ar << myValue;
+		ar << remoteNumber;
 
 	}
 }

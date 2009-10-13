@@ -30,6 +30,16 @@ long ExtObject::eBatteryPercent(LPVAL params, ExpReturn& ret)
 	return ret = remote.BatteryPercent;
 }
 
+long ExtObject::eIrState(LPVAL params, ExpReturn& ret)
+{
+	if(remote.IR.Mode == wiimote_state::ir::EXTENDED)
+		return ret.ReturnString(pRuntime, "Extended");
+	else if(remote.IR.Mode == wiimote_state::ir::BASIC)
+		return ret.ReturnString(pRuntime, "Basic");
+	else
+		return ret.ReturnString(pRuntime, "Off");
+}
+
 long ExtObject::ePitch(LPVAL params, ExpReturn &ret)
 {
 	return ret = remote.Acceleration.Orientation.Pitch;

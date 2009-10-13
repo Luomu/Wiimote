@@ -29,6 +29,21 @@ long ExtObject::aDisconnect(LPVAL params)
 	return 0;
 }
 
+long ExtObject::aSetReportType(LPVAL params)
+{
+	return 0;
+			/*enum input_report
+			{
+			// combinations if buttons/acceleration/IR/Extension data
+			IN_BUTTONS				 = 0x30,
+			IN_BUTTONS_ACCEL		 = 0x31,
+			IN_BUTTONS_ACCEL_IR		 = 0x33, // reports IR EXTENDED data (dot sizes)
+			IN_BUTTONS_ACCEL_EXT	 = 0x35,
+			IN_BUTTONS_ACCEL_IR_EXT	 = 0x37, // reports IR BASIC data (no dot sizes)
+			IN_BUTTONS_BALANCE_BOARD = 0x32, // must use this for the balance board
+			};*/
+}
+
 long ExtObject::aSetRumble(LPVAL params)
 {
 	bool mode = params[0].GetBool();
