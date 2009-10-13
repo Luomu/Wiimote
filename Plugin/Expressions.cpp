@@ -30,7 +30,7 @@ long ExtObject::eBatteryPercent(LPVAL params, ExpReturn& ret)
 	return ret = remote.BatteryPercent;
 }
 
-long ExtObject::eIrState(LPVAL params, ExpReturn& ret)
+long ExtObject::eReportLevel(LPVAL params, ExpReturn& ret)
 {
 	if(remote.IR.Mode == wiimote_state::ir::EXTENDED)
 		return ret.ReturnString(pRuntime, "Extended");
@@ -78,4 +78,31 @@ long ExtObject::eAccY(LPVAL params, ExpReturn &ret)
 long ExtObject::eAccZ(LPVAL params, ExpReturn &ret)
 {
 	return ret = remote.Acceleration.Z;
+}
+
+long ExtObject::eIrX(LPVAL params, ExpReturn &ret)
+{
+	return ret = (remote.IR.Dot[0].X + remote.IR.Dot[1].X) / 2;
+}
+
+long ExtObject::eIrY(LPVAL params, ExpReturn &ret)
+{
+	return ret = (remote.IR.Dot[0].Y + remote.IR.Dot[1].Y) / 2;
+}
+
+long ExtObject::eIrZ(LPVAL params, ExpReturn &ret)
+{
+	if(remote.IR.Mode == wiimote_state::ir::EXTENDED)
+		return ret = remote.IR.Dot[0].Size;
+	else
+		return 1.f;
+}
+
+long ExtObject::eLedStatus(LPVAL params, ExpReturn &ret)
+{
+	std::stringstream ss;
+	for(unsigned i = 0; i < 4; i++) {
+		ss << remote.IR.Dot[i].bVisible;
+	}
+	return ret.ReturnString(pRuntime, ss.str().c_str());
 }

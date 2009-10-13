@@ -35,11 +35,14 @@ void DefineACES(MicroAceTime* at)
 	// Actions
 	// Format:
 	// ADDCND(List name, Category, Display string, Function address, Script name, Flags)
-	ADDPARAM(PARAM_VALUE, "Example parameter", "Here is an example parameter.");
-	ADDACT("My action", "My category", "Example action (%0)", &ExtObject::aMyAction, "MyAction", 0);
+	//ADDPARAM(PARAM_VALUE, "Example parameter", "Here is an example parameter.");
+	//ADDACT("My action", "My category", "Example action (%0)", &ExtObject::aMyAction, "MyAction", 0);
 
 	ADDACT("Connect", "Connection", "Connect remote", &ExtObject::aConnect, "Connect", 0);
 	ADDACT("Disconnect", "Connection", "Disconnect remote", &ExtObject::aDisconnect, "Disconnect", 0);
+
+	ADDPARAMCOMBO("Report level", "Set features to report", "Buttons|Accelerometer|Infrared");
+	ADDACT("Set report level", "Remote", "Set report level to %0", &ExtObject::aSetReportType, "SetReportType", 0);
 
 	ADDPARAMCOMBO("Rumble", "Turn rumble off or on", "Off|On");
 	ADDACT("Set rumble", "Remote", "Set rumble %0", &ExtObject::aSetRumble, "SetRumble", 0);
@@ -62,6 +65,11 @@ void DefineACES(MicroAceTime* at)
 	ADDEXP("Acceleration Y", "Acceleration", "AccY", &ExtObject::eAccY, RETURN_FLOAT);
 	ADDEXP("Acceleration Z", "Acceleration", "AccZ", &ExtObject::eAccZ, RETURN_FLOAT);
 	ADDEXP("Battery level", "Status", "BatteryLevel", &ExtObject::eBatteryPercent, RETURN_INTEGER);
+	ADDEXP("IR X", "Infrared", "IrX", &ExtObject::eIrX, RETURN_FLOAT);
+	ADDEXP("IR Y", "Infrared", "IrY", &ExtObject::eIrY, RETURN_FLOAT);
+	ADDEXP("IR Z", "Infrared", "IrZ", &ExtObject::eIrZ, RETURN_FLOAT);
+	ADDEXP("Report level", "Status", "ReportLevel", &ExtObject::eIrZ, RETURN_FLOAT);
+	ADDEXP("Led status", "Infrared", "LedStatus", &ExtObject::eLedStatus, RETURN_STRING);
 
 	// This line includes your common ACEs as specified in Main.h
 #include "..\Common\CommonAceTable.hpp"

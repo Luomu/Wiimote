@@ -31,17 +31,25 @@ long ExtObject::aDisconnect(LPVAL params)
 
 long ExtObject::aSetReportType(LPVAL params)
 {
+	//Buttons|Accelerometer|Infrared
+	int mode = params[0].GetInt();
+	if(mode == 0)
+		remote.SetReportType(wiimote::IN_BUTTONS);
+	if(mode == 1)
+		remote.SetReportType(wiimote::IN_BUTTONS_ACCEL);
+	if(mode == 2)
+		remote.SetReportType(wiimote::IN_BUTTONS_ACCEL_IR);
 	return 0;
-			/*enum input_report
-			{
-			// combinations if buttons/acceleration/IR/Extension data
-			IN_BUTTONS				 = 0x30,
-			IN_BUTTONS_ACCEL		 = 0x31,
-			IN_BUTTONS_ACCEL_IR		 = 0x33, // reports IR EXTENDED data (dot sizes)
-			IN_BUTTONS_ACCEL_EXT	 = 0x35,
-			IN_BUTTONS_ACCEL_IR_EXT	 = 0x37, // reports IR BASIC data (no dot sizes)
-			IN_BUTTONS_BALANCE_BOARD = 0x32, // must use this for the balance board
-			};*/
+	/*enum input_report
+	{
+	// combinations if buttons/acceleration/IR/Extension data
+	IN_BUTTONS				 = 0x30,
+	IN_BUTTONS_ACCEL		 = 0x31,
+	IN_BUTTONS_ACCEL_IR		 = 0x33, // reports IR EXTENDED data (dot sizes)
+	IN_BUTTONS_ACCEL_EXT	 = 0x35,
+	IN_BUTTONS_ACCEL_IR_EXT	 = 0x37, // reports IR BASIC data (no dot sizes)
+	IN_BUTTONS_BALANCE_BOARD = 0x32, // must use this for the balance board
+	};*/
 }
 
 long ExtObject::aSetRumble(LPVAL params)
