@@ -118,6 +118,12 @@ public:
 
 	virtual void		ApplyThemingToDialog(HWND hWnd) = 0;
 	virtual bool		TextureExists(int iTexture) = 0;
+
+	virtual int			GetControlCount() = 0;
+	virtual const char* GetControlName(int index) = 0;
+	virtual int			GetControlPlayer(int index) = 0;
+
+	virtual const char*	GetAnimationName(int iHandle) = 0;
 };
 
 // Handy define for loading resources from this ext

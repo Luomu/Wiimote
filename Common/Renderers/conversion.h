@@ -42,7 +42,7 @@ namespace cr {
 		{
 			// Generate lookup table
 			for (uint i = 0; i < 256; i++)
-				table[i] = (T)i / 255.0;
+				table[i] = static_cast<T>(i) / static_cast<T>(255.0);
 		}
 
 		inline T operator[](uint index) const
@@ -58,7 +58,27 @@ namespace cr {
 	static const byte_to_float_lookup<cr_float> byte_to_crfloat;
 
 	// Float->int with fistp x86 instruction, truncates due to above controlfp startup setting
-	inline int ftoi_fpu(cr_float f)
+	inline int ftoi_fpu(float f)
+	{
+		// Assembly is disabled? Use the built in slow cast
+#ifdef CRMATH_NO_ASSEMBLY
+		return (int)f;
+
+		// Optimized version
+#else
+		int i;
+
+		__asm
+		{
+			fld f
+			fistp i
+		}
+
+		return i;
+#endif
+	}
+
+	inline int ftoi_fpu(double f)
 	{
 		// Assembly is disabled? Use the built in slow cast
 #ifdef CRMATH_NO_ASSEMBLY

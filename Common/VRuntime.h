@@ -462,6 +462,10 @@ public:
 
 	virtual void SuppressElseEvent() = 0;
 
+	// Other control functions
+	virtual float GetControlState(const char* controlName, int player) = 0;
+	virtual bool SetControlState(const char* controlName, int player, float val) = 0;
+
 	//////////////////////////////
 	// PLUGIN ACCESSIBLE DATA - for internal use only!
 
