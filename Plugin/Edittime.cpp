@@ -24,6 +24,27 @@
 BEGIN_PROPERTY_TABLE();
 
 	PROPERTY_VALUE(remoteNumber, "Remote number", "Remote number (1-4)");
+	if(editObject) {
+		int count = editObject->pEditTime->GetControlCount();
+		string Controls = "-";
+
+		map<string, int> controlStringToCombo[10];
+		vector<Control> comboToControlString;
+
+		comboToControlString.push_back(Control(0, "",0));
+
+		for(int c = 0; c < count; c++) {
+			int controlPlayer = editObject->pEditTime->GetControlPlayer(c);
+			string controlName = editObject->pEditTime->GetControlName(c);
+			int controlPlayerDisplay = controlPlayer + 1;
+
+			Controls += "|" + controlName + " (" + controlPlayerDisplay + ")";
+
+			controlStringToCombo[controlPlayer][controlName] = c + 1;
+			comboToControlString.push_back(Control(controlPlayer, controlName, c + 1));
+		}
+	}
+	PROPERTY_COMBO(combovalue, "Button name", "", Controls.c_str());
 
 END_PROPERTY_TABLE  ();
 
@@ -64,6 +85,11 @@ void EditExt::OnPut()
 {
 	// Default value for the property
 	remoteNumber = 1;
+
+	//fill the Control section with defaults
+	controls[0][Wii::A] = Control(0, "Jump",1);
+
+	controllerCombo = 0;
 
 	// Default object size
 	pInfo->objectWidth = 64;

@@ -149,6 +149,10 @@ public:
 	int controllerCombo;
 };
 
+//operators to serialize Controls
+bin& operator<<(bin& b, const Control& c);
+bin& operator>>(bin& b, Control& c);
+
 // Internal stuff include
 #include "..\Common\Internal.hpp"
 #include "..\Common\Properties.h"

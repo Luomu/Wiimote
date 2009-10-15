@@ -36,12 +36,20 @@ void EditExt::Serialize(bin& ar)
 
 		//ar >> myValue;
 		ar >> remoteNumber;
+		for(int i=0; i < BUTTONS; i++) {
+			ar >> controls[i];
+		}
+		ar >> controllerCombo;
 
 	}
 	else {
 		
 		//ar << myValue;
 		ar << remoteNumber;
+		for(int i=0; i < BUTTONS; i++) {
+			ar << controls[i];
+		}
+		ar << controllerCombo;
 
 	}
 }
