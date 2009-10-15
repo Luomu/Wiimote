@@ -24,6 +24,7 @@
 #include "..\Common\ExpReturn.hpp"
 
 #include "..\Wiiyourself\wiimote.h"
+#include "Controls.h"
 
 #define OBJECTRECT CRect(editObject->objectX, editObject->objectY, editObject->objectX + editObject->objectWidth, editObject->objectY + editObject->objectHeight)
 
@@ -113,6 +114,8 @@ public:
 };
 
 //////////// EDITTIME INFO ////////////
+#define CONTROLLERS 4
+#define BUTTONS 11
 class EditExt
 {
 public:
@@ -142,6 +145,8 @@ public:
 
 	//int myValue;
 	int remoteNumber;
+	Control controls[][];
+	int controllerCombo;
 };
 
 // Internal stuff include

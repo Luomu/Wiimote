@@ -66,6 +66,11 @@ BOOL ExtObject::OnFrame()
 	if(remote.RefreshState() == NO_CHANGE)
 		return 0;
 
+	//Controls
+	//iterate through controls, set states
+	//SDK is not up to date enough
+	pRuntime->SetControlState("Jump", 0, 7);
+
 	return 0;	// Do not call again
 }
 
