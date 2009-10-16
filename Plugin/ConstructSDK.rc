@@ -69,11 +69,11 @@ BEGIN
     OBJ_NAME                "Wiimote"
     OBJ_AUTHOR              "K. K."
     OBJ_VERSION             "1.00"
-    OBJ_DESCRIPTION         "Template SDK object."
+    OBJ_DESCRIPTION         "Wiimote plugin."
     OBJ_DATE                "Oct 09"
     OBJ_COPYRIGHT           "No copyright"
     OBJ_WEB                 "www.paahdin.com"
-    OBJ_EMAIL               "kimmo@paahdin.com"
+    OBJ_EMAIL               "catchall@paahdin.com"
     IDS_CATEGORY            "Game"
     IDS_LICENSE             "Do whatever you want"
 END

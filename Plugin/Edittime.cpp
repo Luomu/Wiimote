@@ -117,7 +117,9 @@ void EditExt::OnPut()
 	remoteNumber = 1;
 
 	//fill the Control section with defaults
-	//controls[0][Wii::A] = Control(0, "Jump",1);
+	controls[Wii::A] = Control(0, "Jump",1);
+	controls[Wii::Left] = Control(0, "Move Left",2);
+	controls[Wii::Right] = Control(0, "Move Right",3);
 
 	controllerCombo = 0;
 

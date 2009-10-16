@@ -106,6 +106,7 @@ public:
 	long eIrY(LPVAL params, ExpReturn& ret);
 	long eIrZ(LPVAL params, ExpReturn& ret);
 
+	vector<RunControl> controls;
 	////////////////////////////////////////////////////
 	// Data members
 
@@ -120,7 +121,6 @@ public:
 class EditExt
 {
 public:
-	Control blaa;
 	///////////////////////////
 	// Class data
 	EditExt(class VEditTime* pVEditTime, class editInfo* pEInfo);

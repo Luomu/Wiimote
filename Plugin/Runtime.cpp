@@ -37,6 +37,14 @@ void ExtObject::OnCreate()
 	//ar >> myValue;
 	ar >> remoteNumber;
 
+	//controls
+	Control editControl;
+	for(int i = 0; i < BUTTONS; i++) {
+		ar >> editControl;
+		if(editControl.control != "")
+			controls.push_back(RunControl(editControl, 0, (Wii::Buttons)i));
+	}
+
 	// Finished reading data
 	ar.detach();
 
@@ -68,10 +76,15 @@ BOOL ExtObject::OnFrame()
 
 	//Controls
 	//iterate through controls, set states
-	//SDK is not up to date enough
-	pRuntime->SetControlState("Jump", 0, 7);
+	vector<RunControl>::iterator i = controls.begin();
+	for(; i!= controls.end(); i++)
+	{
+		float state = pRuntime->GetControlState(i->control.c_str(), i->player);
+		state = max(state, ButtonState(i->button));
+		pRuntime->SetControlState(i->control.c_str(), 0, state);
+	}
 
-	return 0;	// Do not call again
+	return 0;
 }
 
 // Called every frame, after the events and before drawing, for you to update your object if necessary

@@ -29,8 +29,11 @@ void ExtObject::Serialize(bin& ar)
 // You never need to check 'Version' while saving.
 void EditExt::Serialize(bin& ar)
 {
-	int Version = 1;
+	int Version = 2;
 	SerializeVersion(ar, Version);
+
+	if(Version < 2)
+		return;
 
 	if (ar.loading) {
 		ar >> remoteNumber;
