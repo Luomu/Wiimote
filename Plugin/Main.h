@@ -114,12 +114,13 @@ public:
 };
 
 //////////// EDITTIME INFO ////////////
-#define CONTROLLERS 4
-#define BUTTONS 11
+//#define CONTROLLERS 1
+#define BUTTONS 12
+#define WIIBUTTONSTRING "A|B|1|2|Home|Up|Down|Left|Right|Plus|Minus"
 class EditExt
 {
 public:
-
+	Control blaa;
 	///////////////////////////
 	// Class data
 	EditExt(class VEditTime* pVEditTime, class editInfo* pEInfo);
@@ -145,7 +146,7 @@ public:
 
 	//int myValue;
 	int remoteNumber;
-	Control controls[][];
+	Control controls[BUTTONS];
 	int controllerCombo;
 };
 

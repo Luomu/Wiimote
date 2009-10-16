@@ -33,6 +33,8 @@
 #include <map>
 using namespace std;
 
+std::string operator+ (std::string& s, int& i);
+
 #define CONSTRUCT_SDK
 
 #include "..\Common\DXSnips.h"
@@ -61,6 +63,7 @@ typedef void*					FontHandle;
 //extern vector<EXTROUTINE> ActRoutines;
 //extern vector<EXTROUTINE> ExpRoutines;
 //extern vector<CString> ExpNames;
+#include "Controls.h"
 
 #include "Main.h"
 #include "..\Common\bin.h"

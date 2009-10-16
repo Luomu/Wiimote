@@ -28,7 +28,7 @@ void DefineACES(MicroAceTime* at)
 	ADDCND("Connected", "Connection", "%o Remote connected", &ExtObject::cConnected, "Connected", 0);
 	ADDCND("Connection lost", "Connection", "%o Connection lost", &ExtObject::cConnectionLost, "ConnectionLost", 0);
 
-	ADDPARAMCOMBO("Button", "Remote button", "A|B|1|2|Home|Up|Down|Left|Right|Plus|Minus");
+	ADDPARAMCOMBO("Button", "Remote button", WIIBUTTONSTRING);
 	ADDCND("Button down", "Buttons", "%o %0 is down", &ExtObject::cButtonDown, "ButtonDown", 0);
 
 	/////////////////////////////

@@ -27,12 +27,15 @@ BEGIN_PROPERTY_TABLE();
 	if(editObject) {
 		int count = editObject->pEditTime->GetControlCount();
 		string Controls = "-";
-
+		//construct supports 10 players (we only use 1 per plugin instance,
+		//selected by remoteNumber
 		map<string, int> controlStringToCombo[10];
 		vector<Control> comboToControlString;
 
+		controlStringToCombo[0][""] = 0;
 		comboToControlString.push_back(Control(0, "",0));
 
+		//build a list of controls
 		for(int c = 0; c < count; c++) {
 			int controlPlayer = editObject->pEditTime->GetControlPlayer(c);
 			string controlName = editObject->pEditTime->GetControlName(c);
@@ -40,11 +43,38 @@ BEGIN_PROPERTY_TABLE();
 
 			Controls += "|" + controlName + " (" + controlPlayerDisplay + ")";
 
+			//pair control name to a combo index
 			controlStringToCombo[controlPlayer][controlName] = c + 1;
+			//pair combo index to a control name
 			comboToControlString.push_back(Control(controlPlayer, controlName, c + 1));
 		}
+
+		if(iMode == MODE_WRITE) {
+			for(int i = 0; i < BUTTONS; i++) {
+				Control& control = editObject->objectPtr->controls[i];
+				if(control.player == -1)
+					control.c = 0;
+				else
+					control.c = controlStringToCombo[control.player][control.control];
+			}
+		}
+
+		int i = editObject->objectPtr->remoteNumber;
+
+		//"A|B|1|2|Home|Up|Down|Left|Right|Plus|Minus"
+		PROPERTY_COMBO(controls[0].c, "A", "", Controls.c_str());
+		PROPERTY_COMBO(controls[1].c, "B", "", Controls.c_str());
+		PROPERTY_COMBO(controls[2].c, "1", "", Controls.c_str());
+		PROPERTY_COMBO(controls[3].c, "2", "", Controls.c_str());
+		PROPERTY_COMBO(controls[4].c, "Home", "", Controls.c_str());
+		PROPERTY_COMBO(controls[5].c, "Up", "", Controls.c_str());
+		PROPERTY_COMBO(controls[6].c, "Down", "", Controls.c_str());
+		PROPERTY_COMBO(controls[7].c, "Left", "", Controls.c_str());
+		PROPERTY_COMBO(controls[8].c, "Right", "", Controls.c_str());
+		PROPERTY_COMBO(controls[9].c, "Plus", "", Controls.c_str());
+		PROPERTY_COMBO(controls[10].c, "Minus", "", Controls.c_str());
 	}
-	PROPERTY_COMBO(combovalue, "Button name", "", Controls.c_str());
+	
 
 END_PROPERTY_TABLE  ();
 
@@ -87,7 +117,7 @@ void EditExt::OnPut()
 	remoteNumber = 1;
 
 	//fill the Control section with defaults
-	controls[0][Wii::A] = Control(0, "Jump",1);
+	//controls[0][Wii::A] = Control(0, "Jump",1);
 
 	controllerCombo = 0;
 

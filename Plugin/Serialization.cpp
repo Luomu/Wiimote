@@ -33,8 +33,6 @@ void EditExt::Serialize(bin& ar)
 	SerializeVersion(ar, Version);
 
 	if (ar.loading) {
-
-		//ar >> myValue;
 		ar >> remoteNumber;
 		for(int i=0; i < BUTTONS; i++) {
 			ar >> controls[i];
@@ -43,8 +41,6 @@ void EditExt::Serialize(bin& ar)
 
 	}
 	else {
-		
-		//ar << myValue;
 		ar << remoteNumber;
 		for(int i=0; i < BUTTONS; i++) {
 			ar << controls[i];
