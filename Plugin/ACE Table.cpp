@@ -29,7 +29,11 @@ void DefineACES(MicroAceTime* at)
 	ADDCND("Connection lost", "Connection", "%o Connection lost", &ExtObject::cConnectionLost, "ConnectionLost", 0);
 
 	ADDPARAMCOMBO("Button", "Remote button", WIIBUTTONSTRING);
+	ADDCND("Button pressed", "Buttons", "%o %0 pressed", &ExtObject::cButtonPressed, "ButtonPressed", 0);
+	ADDPARAMCOMBO("Button", "Remote button", WIIBUTTONSTRING);
 	ADDCND("Button down", "Buttons", "%o %0 is down", &ExtObject::cButtonDown, "ButtonDown", 0);
+	ADDPARAMCOMBO("Button", "Remote button", WIIBUTTONSTRING);
+	ADDCND("Button released", "Buttons", "%o %0 released", &ExtObject::cButtonReleased, "ButtonReleased", 0);
 
 	/////////////////////////////
 	// Actions
@@ -41,7 +45,7 @@ void DefineACES(MicroAceTime* at)
 	ADDACT("Connect", "Connection", "Connect remote", &ExtObject::aConnect, "Connect", 0);
 	ADDACT("Disconnect", "Connection", "Disconnect remote", &ExtObject::aDisconnect, "Disconnect", 0);
 
-	ADDPARAMCOMBO("Report level", "Set features to report", "Buttons|Accelerometer|Infrared");
+	ADDPARAMCOMBO("Report level", "Set features to report. Accelerometer and Infrared increase power consumption.", "Buttons only|Accelerometer|Acc + Infrared");
 	ADDACT("Set report level", "Remote", "Set report level to %0", &ExtObject::aSetReportType, "SetReportType", 0);
 
 	ADDPARAMCOMBO("Rumble", "Turn rumble off or on", "Off|On");
@@ -68,7 +72,7 @@ void DefineACES(MicroAceTime* at)
 	ADDEXP("IR X", "Infrared", "IrX", &ExtObject::eIrX, RETURN_FLOAT);
 	ADDEXP("IR Y", "Infrared", "IrY", &ExtObject::eIrY, RETURN_FLOAT);
 	ADDEXP("IR Z", "Infrared", "IrZ", &ExtObject::eIrZ, RETURN_FLOAT);
-	ADDEXP("Report level", "Status", "ReportLevel", &ExtObject::eIrZ, RETURN_FLOAT);
+	ADDEXP("IR Report level", "Status", "ReportLevel", &ExtObject::eReportLevel, RETURN_STRING);
 	ADDEXP("Led status", "Infrared", "LedStatus", &ExtObject::eLedStatus, RETURN_STRING);
 
 	// This line includes your common ACEs as specified in Main.h

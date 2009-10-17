@@ -43,6 +43,7 @@ void ExtObject::OnCreate()
 		ar >> editControl;
 		if(editControl.control != "")
 			controls.push_back(RunControl(editControl, 0, (Wii::Buttons)i));
+		ButtonStates[i] = WiiButtonState::UP;
 	}
 
 	// Finished reading data
@@ -74,16 +75,18 @@ BOOL ExtObject::OnFrame()
 	if(remote.RefreshState() == NO_CHANGE)
 		return 0;
 
-	//Controls
 	//iterate through controls, set states
 	vector<RunControl>::iterator i = controls.begin();
 	for(; i!= controls.end(); i++)
 	{
 		float state = pRuntime->GetControlState(i->control.c_str(), i->player);
-		state = max(state, ButtonState(i->button));
+		state = max(state, ButtonDown(i->button));
 		pRuntime->SetControlState(i->control.c_str(), 0, state);
+		debugLastAction = i->control;
 	}
 
+	for(int i = 0; i < BUTTONS; i++)
+		UpdateButtonState(i);
 	return 0;
 }
 
@@ -126,6 +129,28 @@ long ExtObject::GetData(int id, void* param)
 long ExtObject::CallFunction(int id, void* param)
 {
 	return 0;
+}
+
+void ExtObject::UpdateButtonState(int button) {
+	if(ButtonDown(button)) {
+		if(ButtonStates[button] == WiiButtonState::UP) {
+			ButtonStates[button] = WiiButtonState::JUST_PRESSED;
+			return;
+		}
+		if(ButtonStates[button] == WiiButtonState::JUST_PRESSED) {
+			ButtonStates[button] = WiiButtonState::DOWN;
+			return;
+		}
+	} else {
+		if(ButtonStates[button] == WiiButtonState::DOWN) {
+			ButtonStates[button] = WiiButtonState::JUST_RELEASED;
+			return;
+		}
+		if(ButtonStates[button] == WiiButtonState::JUST_RELEASED) {
+			ButtonStates[button] = WiiButtonState::UP;
+			return;
+		}
+	}
 }
 
 #else //ifdef RUN_ONLY

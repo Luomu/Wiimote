@@ -18,19 +18,46 @@ long ExtObject::cConnectionLost(LPVAL params)
 		return false;
 }
 
+long ExtObject::cButtonPressed(LPVAL params)
+{
+	if(!remote.IsConnected())
+		return false;
+
+	if(ButtonStates[params[0].GetInt()] == WiiButtonState::JUST_PRESSED)
+		return true;
+
+	return false;
+}
+
 long ExtObject::cButtonDown(LPVAL params)
 {
 	if(!remote.IsConnected())
 		return false;
 
-	return ButtonState(params[0].GetInt());
+	//if button is reported down by hardware and
+	//state is not just pressed, report down
+	return ButtonDown(params[0].GetInt());
 }
 
-BOOL ExtObject::ButtonState(int button)
+long ExtObject::cButtonReleased(LPVAL params)
+{
+	if(!remote.IsConnected())
+		return false;
+	
+	//if button is not down, but its state is recorded as down
+	//it has been released
+	if(ButtonStates[params[0].GetInt()] == WiiButtonState::JUST_RELEASED)
+		return true;
+
+	return false;
+}
+
+//report button down or not
+BOOL ExtObject::ButtonDown(int button)
 {
 	//"A|B|1|2|Home|Up|Down|Left|Right"
 	switch(button) {
-		case 0:
+		case 0:		
 			return remote.Button.A();
 		case 1:
 			return remote.Button.B();

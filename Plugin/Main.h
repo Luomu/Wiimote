@@ -69,7 +69,8 @@ public:
 	void		DebuggerUpdateDisplay(ExpStore*& pPrivateVars);
 	void		OnDebuggerValueChanged(const char* name, const char* value);
 
-	BOOL		ButtonState(int button);
+	BOOL		ButtonDown(int button);
+	void		UpdateButtonState(int button);
 
 	////////////////////////////////////////////////////
 	// ACTIONS, CONDITIONS AND EXPRESSIONS DEFINITIONS
@@ -78,7 +79,9 @@ public:
 	long cConnected(LPVAL params);
 	long cConnectionLost(LPVAL params);
 
+	long cButtonPressed(LPVAL params);
 	long cButtonDown(LPVAL params);
+	long cButtonReleased(LPVAL params);
 
 	long aMyAction(LPVAL params);
 
@@ -107,6 +110,11 @@ public:
 	long eIrZ(LPVAL params, ExpReturn& ret);
 
 	vector<RunControl> controls;
+
+	//debugging stuff
+	string debugLastAction;
+	int ButtonStates[BUTTONS];
+
 	////////////////////////////////////////////////////
 	// Data members
 
@@ -115,9 +123,6 @@ public:
 };
 
 //////////// EDITTIME INFO ////////////
-//#define CONTROLLERS 1
-#define BUTTONS 12
-#define WIIBUTTONSTRING "A|B|1|2|Home|Up|Down|Left|Right|Plus|Minus"
 class EditExt
 {
 public:

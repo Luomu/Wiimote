@@ -5,7 +5,7 @@
 // Use calls to pRuntime->AddDebuggerItem to display items.
 void ExtObject::DebuggerUpdateDisplay(ExpStore*& pPrivateVars)
 {
-
+	pRuntime->AddDebuggerItem("Last action", debugLastAction.c_str(), false);
 }
 
 // Called when a debugger value has been changed.
