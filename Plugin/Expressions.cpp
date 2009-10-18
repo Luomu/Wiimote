@@ -82,12 +82,12 @@ long ExtObject::eAccZ(LPVAL params, ExpReturn &ret)
 
 long ExtObject::eIrX(LPVAL params, ExpReturn &ret)
 {
-	return ret = (remote.IR.Dot[0].X + remote.IR.Dot[1].X) / 2;
+	return ret = calcX;
 }
 
 long ExtObject::eIrY(LPVAL params, ExpReturn &ret)
 {
-	return ret = (remote.IR.Dot[0].Y + remote.IR.Dot[1].Y) / 2;
+	return ret = calcY;
 }
 
 long ExtObject::eIrZ(LPVAL params, ExpReturn &ret)

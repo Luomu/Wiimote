@@ -25,6 +25,8 @@ void ExtObject::OnCreate()
 {
 	//int myValue;
 	int remoteNumber;
+	calcX = 1.f;
+	calcY = 1.f;
 
 	// Load the edittime data that was serialized.
 	bin ar;
@@ -74,6 +76,8 @@ BOOL ExtObject::OnFrame()
 
 	if(remote.RefreshState() == NO_CHANGE)
 		return 0;
+
+	CalculateIrXY();
 
 	//iterate through controls, set states
 	vector<RunControl>::iterator i = controls.begin();
@@ -131,7 +135,7 @@ long ExtObject::CallFunction(int id, void* param)
 	return 0;
 }
 
-void ExtObject::UpdateButtonState(int button) {
+void ExtObject::UpdateButtonState(const int button) {
 	if(ButtonDown(button)) {
 		if(ButtonStates[button] == WiiButtonState::UP) {
 			ButtonStates[button] = WiiButtonState::JUST_PRESSED;
@@ -151,6 +155,68 @@ void ExtObject::UpdateButtonState(int button) {
 			return;
 		}
 	}
+}
+
+//Attempt to correct raw x/y values for rotation
+void ExtObject::FixIrRotation()
+{
+	float angle = remote.Acceleration.Orientation.Roll;
+	float s, c;
+	int x, y;
+
+	if(!angle)
+		return;
+	
+	if(angle != 0) {
+		s = sin(DEGREE_TO_RAD(angle));
+		c = cos(DEGREE_TO_RAD(angle));
+
+		for(int i = 0; i < 4; i++) {
+			wiimote_state::ir::dot* dot = &remote.IR.Dot[i];
+			_ASSERT(dot);
+			if(!dot->bVisible)
+				continue;
+			x = dot->RawX - (remote.IR.MAX_RAW_X/2);
+			y = dot->RawY - (remote.IR.MAX_RAW_Y/2);
+
+			dot->X = (c * x) + (-s * y);
+			dot->Y = (s * x) + (c * y);
+
+			dot->X += (remote.IR.MAX_RAW_X/2);
+			dot->Y += (remote.IR.MAX_RAW_Y/2);
+		}
+	}
+}
+
+/*
+	Things to keep in mind:
+	Number of visible leds
+	Remote orientation
+	Sensor bar position (above/below)
+	Aspect ratio
+	Maybe use rawX/Y
+*/
+void ExtObject::CalculateIrXY()
+{
+	//FixIrRotation();
+	calcX = 0.f;
+	calcY = 0.f;
+
+	//average values	
+	float xtotal = 0.f;
+	float ytotal = 0.f;
+	int dotcount = 0;
+
+	for(int i=0; i < 4; ++i) {
+		if(remote.IR.Dot[i].bVisible) {
+			calcX += remote.IR.Dot[i].X;
+			calcY += remote.IR.Dot[i].Y;
+			++dotcount;
+		}
+	}
+
+	calcX /= dotcount;
+	calcY /= dotcount;
 }
 
 #else //ifdef RUN_ONLY

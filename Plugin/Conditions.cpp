@@ -53,7 +53,7 @@ long ExtObject::cButtonReleased(LPVAL params)
 }
 
 //report button down or not
-BOOL ExtObject::ButtonDown(int button)
+BOOL ExtObject::ButtonDown(const int button)
 {
 	//"A|B|1|2|Home|Up|Down|Left|Right"
 	switch(button) {

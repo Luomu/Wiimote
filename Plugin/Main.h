@@ -69,8 +69,10 @@ public:
 	void		DebuggerUpdateDisplay(ExpStore*& pPrivateVars);
 	void		OnDebuggerValueChanged(const char* name, const char* value);
 
-	BOOL		ButtonDown(int button);
-	void		UpdateButtonState(int button);
+	BOOL		ButtonDown(const int button);
+	void		UpdateButtonState(const int button);
+	void		FixIrRotation();
+	void		CalculateIrXY();
 
 	////////////////////////////////////////////////////
 	// ACTIONS, CONDITIONS AND EXPRESSIONS DEFINITIONS
@@ -110,6 +112,10 @@ public:
 	long eIrZ(LPVAL params, ExpReturn& ret);
 
 	vector<RunControl> controls;
+
+	//calculated, possibley smoothed IR values 0-1.0
+	float calcX;
+	float calcY;
 
 	//debugging stuff
 	string debugLastAction;
