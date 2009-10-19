@@ -119,6 +119,7 @@ public:
 	//calculated, possibley smoothed IR values 0-1.0
 	float calcX;
 	float calcY;
+	float calcZ;
 
 	//debugging stuff
 	string debugLastAction;

@@ -202,6 +202,7 @@ void ExtObject::CalculateIrXY()
 	//FixIrRotation();
 	calcX = 0.f;
 	calcY = 0.f;
+	calcZ = 0.f;
 
 	//average values	
 	float xtotal = 0.f;
@@ -212,6 +213,7 @@ void ExtObject::CalculateIrXY()
 		if(remote.IR.Dot[i].bVisible) {
 			calcX += remote.IR.Dot[i].X;
 			calcY += remote.IR.Dot[i].Y;
+			calcZ += remote.IR.Dot[i].Size;
 			++dotcount;
 		}
 	}
@@ -219,6 +221,7 @@ void ExtObject::CalculateIrXY()
 	if(dotcount) {
 		calcX /= dotcount;
 		calcY /= dotcount;
+		calcZ /= dotcount;
 	}
 }
 

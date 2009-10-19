@@ -92,10 +92,7 @@ long ExtObject::eIrY(LPVAL params, ExpReturn &ret)
 
 long ExtObject::eIrZ(LPVAL params, ExpReturn &ret)
 {
-	if(remote.IR.Mode == wiimote_state::ir::EXTENDED)
-		return ret = remote.IR.Dot[0].Size;
-	else
-		return 1.f;
+	return ret = calcZ;
 }
 
 long ExtObject::eLedStatus(LPVAL params, ExpReturn &ret)

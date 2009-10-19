@@ -65,7 +65,7 @@ void DefineACES(MicroAceTime* at)
 	ADDEXP("Orientation X", "Orientation", "OriX", &ExtObject::eOriX, RETURN_FLOAT);
 	ADDEXP("Orientation Y", "Orientation", "OriY", &ExtObject::eOriY, RETURN_FLOAT);
 	ADDEXP("Orientation Z", "Orientation", "OriZ", &ExtObject::eOriZ, RETURN_FLOAT);
-	ADDEXP("Acceleration Z", "Acceleration", "AccX", &ExtObject::eAccX, RETURN_FLOAT);
+	ADDEXP("Acceleration X", "Acceleration", "AccX", &ExtObject::eAccX, RETURN_FLOAT);
 	ADDEXP("Acceleration Y", "Acceleration", "AccY", &ExtObject::eAccY, RETURN_FLOAT);
 	ADDEXP("Acceleration Z", "Acceleration", "AccZ", &ExtObject::eAccZ, RETURN_FLOAT);
 	ADDEXP("Battery level", "Status", "BatteryLevel", &ExtObject::eBatteryPercent, RETURN_INTEGER);
@@ -77,7 +77,7 @@ void DefineACES(MicroAceTime* at)
 	ADDPARAM(PARAM_VALUE, "1", "Sensor bar led to read from");
 	ADDEXP("Raw IR Y", "Infrared", "RawIrY", &ExtObject::eRawY, RETURN_INTEGER);
 	ADDEXP("IR Report level", "Status", "ReportLevel", &ExtObject::eReportLevel, RETURN_STRING);
-	ADDEXP("Led status", "Infrared", "LedStatus", &ExtObject::eLedStatus, RETURN_STRING);
+	ADDEXP("Led status", "Status", "LedStatus", &ExtObject::eLedStatus, RETURN_STRING);
 
 	// This line includes your common ACEs as specified in Main.h
 #include "..\Common\CommonAceTable.hpp"
