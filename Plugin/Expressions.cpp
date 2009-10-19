@@ -106,3 +106,15 @@ long ExtObject::eLedStatus(LPVAL params, ExpReturn &ret)
 	}
 	return ret.ReturnString(pRuntime, ss.str().c_str());
 }
+
+long ExtObject::eRawX(LPVAL params, ExpReturn &ret)
+{
+	int ledno = clamp(params[0].GetInt() - 1, 0, 3);
+	return ret = remote.IR.Dot[ledno].RawX;
+}
+
+long ExtObject::eRawY(LPVAL params, ExpReturn &ret)
+{
+	int ledno = clamp(params[0].GetInt() - 1, 0, 3);
+	return ret = remote.IR.Dot[ledno].RawY;
+}

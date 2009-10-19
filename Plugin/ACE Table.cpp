@@ -72,6 +72,10 @@ void DefineACES(MicroAceTime* at)
 	ADDEXP("IR X", "Infrared", "IrX", &ExtObject::eIrX, RETURN_FLOAT);
 	ADDEXP("IR Y", "Infrared", "IrY", &ExtObject::eIrY, RETURN_FLOAT);
 	ADDEXP("IR Z", "Infrared", "IrZ", &ExtObject::eIrZ, RETURN_FLOAT);
+	ADDPARAM(PARAM_VALUE, "1", "Sensor bar led to read from");
+	ADDEXP("Raw IR X", "Infrared", "RawIrX", &ExtObject::eRawX, RETURN_INTEGER);
+	ADDPARAM(PARAM_VALUE, "1", "Sensor bar led to read from");
+	ADDEXP("Raw IR Y", "Infrared", "RawIrY", &ExtObject::eRawY, RETURN_INTEGER);
 	ADDEXP("IR Report level", "Status", "ReportLevel", &ExtObject::eReportLevel, RETURN_STRING);
 	ADDEXP("Led status", "Infrared", "LedStatus", &ExtObject::eLedStatus, RETURN_STRING);
 

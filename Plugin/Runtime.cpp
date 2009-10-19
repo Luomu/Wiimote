@@ -74,8 +74,9 @@ BOOL ExtObject::OnFrame()
 	if(!remote.IsConnected())
 		return 0;
 
-	if(remote.RefreshState() == NO_CHANGE)
-		return 0;
+	/*if(remote.RefreshState() == NO_CHANGE)
+		return 0;*/
+	remote.RefreshState();
 
 	CalculateIrXY();
 
@@ -215,8 +216,10 @@ void ExtObject::CalculateIrXY()
 		}
 	}
 
-	calcX /= dotcount;
-	calcY /= dotcount;
+	if(dotcount) {
+		calcX /= dotcount;
+		calcY /= dotcount;
+	}
 }
 
 #else //ifdef RUN_ONLY

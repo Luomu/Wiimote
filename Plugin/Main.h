@@ -111,6 +111,9 @@ public:
 	long eIrY(LPVAL params, ExpReturn& ret);
 	long eIrZ(LPVAL params, ExpReturn& ret);
 
+	long eRawX(LPVAL params, ExpReturn &ret);
+	long eRawY(LPVAL params, ExpReturn &ret);
+
 	vector<RunControl> controls;
 
 	//calculated, possibley smoothed IR values 0-1.0

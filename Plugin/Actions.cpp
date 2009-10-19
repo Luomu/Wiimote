@@ -34,7 +34,7 @@ long ExtObject::aSetReportType(LPVAL params)
 	//Buttons|Accelerometer|Infrared
 	int mode = params[0].GetInt();
 	if(mode == 0)
-		remote.SetReportType(wiimote::IN_BUTTONS);
+		remote.SetReportType(wiimote::IN_BUTTONS, true);
 	if(mode == 1)
 		remote.SetReportType(wiimote::IN_BUTTONS_ACCEL);
 	if(mode == 2)
