@@ -115,3 +115,8 @@ long ExtObject::eRawY(LPVAL params, ExpReturn &ret)
 	int ledno = clamp(params[0].GetInt() - 1, 0, 3);
 	return ret = remote.IR.Dot[ledno].RawY;
 }
+
+long ExtObject::eUpdateAge(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Acceleration.Orientation.UpdateAge;
+}

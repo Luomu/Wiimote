@@ -114,6 +114,8 @@ public:
 	long eRawX(LPVAL params, ExpReturn &ret);
 	long eRawY(LPVAL params, ExpReturn &ret);
 
+	long eUpdateAge(LPVAL params, ExpReturn &ret);
+
 	vector<RunControl> controls;
 
 	//calculated, possibley smoothed IR values 0-1.0

@@ -78,6 +78,7 @@ void DefineACES(MicroAceTime* at)
 	ADDEXP("Raw IR Y", "Infrared", "RawIrY", &ExtObject::eRawY, RETURN_INTEGER);
 	ADDEXP("IR Report level", "Status", "ReportLevel", &ExtObject::eReportLevel, RETURN_STRING);
 	ADDEXP("Led status", "Status", "LedStatus", &ExtObject::eLedStatus, RETURN_STRING);
+	ADDEXP("Update age", "Status", "UpdateAge", &ExtObject::eUpdateAge, RETURN_INTEGER);
 
 	// This line includes your common ACEs as specified in Main.h
 #include "..\Common\CommonAceTable.hpp"
