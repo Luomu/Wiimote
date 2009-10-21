@@ -73,6 +73,7 @@ public:
 	void		UpdateButtonState(const int button);
 	void		FixIrRotation();
 	void		CalculateIrXY();
+	float		CalculateDistance();
 
 	////////////////////////////////////////////////////
 	// ACTIONS, CONDITIONS AND EXPRESSIONS DEFINITIONS

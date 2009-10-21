@@ -87,7 +87,7 @@ BOOL ExtObject::OnFrame()
 		float state = pRuntime->GetControlState(i->control.c_str(), i->player);
 		state = max(state, ButtonDown(i->button));
 		pRuntime->SetControlState(i->control.c_str(), 0, state);
-		debugLastAction = i->control;
+		//debugLastAction = i->control;
 	}
 
 	for(int i = 0; i < BUTTONS; i++)
@@ -223,6 +223,34 @@ void ExtObject::CalculateIrXY()
 		calcY /= dotcount;
 		calcZ /= dotcount;
 	}
+
+	if(dotcount > 1)
+		calcZ = CalculateDistance();
+}
+
+float ExtObject::CalculateDistance() {
+	int i1, i2;
+	float xd, yd;
+
+	for(i1 = 0; i1 < 4; ++i1)
+		if(remote.IR.Dot[i1].bVisible)
+			break;
+	if(i1 == 4) //nothing visible
+		return 0.f;
+
+	for(i2 = 0; i2 < 4; ++i2)
+		if(remote.IR.Dot[i2].bVisible)
+			break;
+	if(i2 == 4) //no second dot visible
+		return 0.f;
+
+	i2 = 1;
+	i1 = 0;
+
+	xd = static_cast<float>(remote.IR.Dot[i2].RawX - remote.IR.Dot[i1].RawX);
+	yd = static_cast<float>(remote.IR.Dot[i2].RawY - remote.IR.Dot[i1].RawY);
+
+	return sqrt(xd * xd + yd * yd);
 }
 
 #else //ifdef RUN_ONLY
