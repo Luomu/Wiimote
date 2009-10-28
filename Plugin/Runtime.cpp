@@ -200,7 +200,24 @@ void ExtObject::FixIrRotation()
 void ExtObject::CalculateIrXY()
 {
 	//FixIrRotation();
-	calcX = 0.f;
+	int dotcount = 0;
+	int exes[IRDOTS];
+	int yys[IRDOTS];
+
+	for(int i = 0; i < IRDOTS; i++) {
+		if(!remote.IR.Dot[i].bVisible)
+			break;
+		exes[i] = wiimote::ir::MAX_RAW_X - remote.IR.Dot[i].RawX;
+		yys[i] = remote.IR.Dot[i].RawY;
+		dotcount++;
+	}
+
+	if(dotcount < 2)
+		return;
+
+	calcX = static_cast<float>((exes[0] + exes[1]) / 2);
+	calcY = static_cast<float>((yys[0] + yys[1]) / 2);
+	/*calcX = 0.f;
 	calcY = 0.f;
 	calcZ = 0.f;
 
@@ -225,7 +242,7 @@ void ExtObject::CalculateIrXY()
 	}
 
 	if(dotcount > 1)
-		calcZ = CalculateDistance();
+		calcZ = CalculateDistance();*/
 }
 
 float ExtObject::CalculateDistance() {

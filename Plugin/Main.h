@@ -117,6 +117,19 @@ public:
 
 	long eUpdateAge(LPVAL params, ExpReturn &ret);
 
+	//Nunchuk expressions
+	long eNunJoyX(LPVAL params, ExpReturn &ret);
+	long eNunJoyY(LPVAL params, ExpReturn &ret);
+	long eNunPitch(LPVAL params, ExpReturn &ret);
+	long eNunRoll(LPVAL params, ExpReturn &ret);
+	long eNunAccX(LPVAL params, ExpReturn &ret);
+	long eNunAccY(LPVAL params, ExpReturn &ret);
+	long eNunAccZ(LPVAL params, ExpReturn &ret);
+	long eNunOriX(LPVAL params, ExpReturn &ret);
+	long eNunOriY(LPVAL params, ExpReturn &ret);
+	long eNunOriZ(LPVAL params, ExpReturn &ret);
+	long eNunUpdateAge(LPVAL params, ExpReturn &ret);
+
 	vector<RunControl> controls;
 
 	//calculated, possibley smoothed IR values 0-1.0

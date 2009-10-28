@@ -120,3 +120,58 @@ long ExtObject::eUpdateAge(LPVAL params, ExpReturn &ret)
 {
 	return ret = remote.Acceleration.Orientation.UpdateAge;
 }
+
+long ExtObject::eNunJoyX(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Nunchuk.Joystick.X;
+}
+
+long ExtObject::eNunJoyY(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Nunchuk.Joystick.Y;
+}
+
+long ExtObject::eNunPitch(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Nunchuk.Acceleration.Orientation.Pitch;
+}
+
+long ExtObject::eNunRoll(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Nunchuk.Acceleration.Orientation.Roll;
+}
+
+long ExtObject::eNunAccX(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Nunchuk.Acceleration.X;
+}
+
+long ExtObject::eNunAccY(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Nunchuk.Acceleration.Y;
+}
+
+long ExtObject::eNunAccZ(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Nunchuk.Acceleration.Z;
+}
+
+long ExtObject::eNunOriX(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Nunchuk.Acceleration.Orientation.X;
+}
+
+long ExtObject::eNunOriY(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Nunchuk.Acceleration.Orientation.Y;
+}
+
+long ExtObject::eNunOriZ(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Nunchuk.Acceleration.Orientation.Z;
+}
+
+long ExtObject::eNunUpdateAge(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.Nunchuk.Acceleration.Orientation.UpdateAge;
+}

@@ -79,6 +79,10 @@ BOOL ExtObject::ButtonDown(const int button)
 			return remote.Button.Plus();
 		case 10:
 			return remote.Button.Minus();
+		case 11:
+			return remote.Nunchuk.C;
+		case 12:
+			return remote.Nunchuk.Z;
 		default:
 			return 0;
 	}

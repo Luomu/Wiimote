@@ -73,6 +73,8 @@ BEGIN_PROPERTY_TABLE();
 		PROPERTY_COMBO(controls[8].c, "Right", "", Controls.c_str());
 		PROPERTY_COMBO(controls[9].c, "Plus", "", Controls.c_str());
 		PROPERTY_COMBO(controls[10].c, "Minus", "", Controls.c_str());
+		PROPERTY_COMBO(controls[11].c, "Nunchuk C", "", Controls.c_str());
+		PROPERTY_COMBO(controls[12].c, "Nunchuk Z", "", Controls.c_str());
 
 		if(iMode == MODE_READ) {
 			for(int i = 0; i < BUTTONS; i++) {

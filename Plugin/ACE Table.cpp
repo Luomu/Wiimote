@@ -80,6 +80,19 @@ void DefineACES(MicroAceTime* at)
 	ADDEXP("Led status", "Status", "LedStatus", &ExtObject::eLedStatus, RETURN_STRING);
 	ADDEXP("Update age", "Status", "UpdateAge", &ExtObject::eUpdateAge, RETURN_INTEGER);
 
+	//Nunchuk expressions
+	ADDEXP("Joystick X", "Nunchuk", "NunJoyX", &ExtObject::eNunJoyX, RETURN_FLOAT);
+	ADDEXP("Joystick Y", "Nunchuk", "NunJoyY", &ExtObject::eNunJoyY, RETURN_FLOAT);
+	ADDEXP("Nunchuk Pitch", "Nunchuk", "NunPitch", &ExtObject::eNunPitch, RETURN_FLOAT);
+	ADDEXP("Nunchuk Roll", "Nunchuk", "NunRoll", &ExtObject::eNunRoll, RETURN_FLOAT);
+	ADDEXP("Nunchuk Acceleration X", "Nunchuk", "NunAccX", &ExtObject::eNunAccX, RETURN_FLOAT);
+	ADDEXP("Nunchuk Acceleration Y", "Nunchuk", "NunAccY", &ExtObject::eNunAccY, RETURN_FLOAT);
+	ADDEXP("Nunchuk Acceleration Z", "Nunchuk", "NunAccZ", &ExtObject::eNunAccZ, RETURN_FLOAT);
+	ADDEXP("Nunchuk Orientation X", "Nunchuk", "NunOriX", &ExtObject::eNunOriX, RETURN_FLOAT);
+	ADDEXP("Nunchuk Orientation Y", "Nunchuk", "NunOriY", &ExtObject::eNunOriY, RETURN_FLOAT);
+	ADDEXP("Nunchuk Orientation Z", "Nunchuk", "NunOriZ", &ExtObject::eNunOriZ, RETURN_FLOAT);
+	ADDEXP("Nunchuk Update age", "Nunchuk", "NunUpdateAge", &ExtObject::eNunUpdateAge, RETURN_INTEGER);
+
 	// This line includes your common ACEs as specified in Main.h
 #include "..\Common\CommonAceTable.hpp"
 }
