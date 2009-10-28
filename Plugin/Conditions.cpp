@@ -87,3 +87,8 @@ BOOL ExtObject::ButtonDown(const int button)
 			return 0;
 	}
 }
+
+long ExtObject::cNunConnected(LPVAL params, ExpReturn &ret)
+{
+	return ret = remote.NunchukConnected();
+}

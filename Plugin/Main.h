@@ -117,7 +117,13 @@ public:
 
 	long eUpdateAge(LPVAL params, ExpReturn &ret);
 
-	//Nunchuk expressions
+	//Nunchuk Actions
+
+	//Nunchuk Conditions
+	long cNunConnected(LPVAL params, ExpReturn &ret);
+	long cNunDisconnected(LPVAL params, ExpReturn &ret);
+
+	//Nunchuk Expressions
 	long eNunJoyX(LPVAL params, ExpReturn &ret);
 	long eNunJoyY(LPVAL params, ExpReturn &ret);
 	long eNunPitch(LPVAL params, ExpReturn &ret);

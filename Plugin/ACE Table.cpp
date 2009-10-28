@@ -80,6 +80,11 @@ void DefineACES(MicroAceTime* at)
 	ADDEXP("Led status", "Status", "LedStatus", &ExtObject::eLedStatus, RETURN_STRING);
 	ADDEXP("Update age", "Status", "UpdateAge", &ExtObject::eUpdateAge, RETURN_INTEGER);
 
+	//Nunchuk actions
+
+	//Nunchuk conditions
+	ADDCND("Nunchuk Connected", "Nunchuk", "%o Nunchuk connected", &ExtObject::cNunConnected, "NunchukConnected", 0);
+
 	//Nunchuk expressions
 	ADDEXP("Joystick X", "Nunchuk", "NunJoyX", &ExtObject::eNunJoyX, RETURN_FLOAT);
 	ADDEXP("Joystick Y", "Nunchuk", "NunJoyY", &ExtObject::eNunJoyY, RETURN_FLOAT);
