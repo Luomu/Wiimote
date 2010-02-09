@@ -94,6 +94,8 @@ public:
 	long aSetRumble(LPVAL params);
 	long aSetLeds(LPVAL params);
 
+	long aSetNunDeadzone(LPVAL params);
+
 	long eBatteryPercent(LPVAL params, ExpReturn& ret);
 	long eReportLevel(LPVAL params, ExpReturn& ret);
 	long eLedStatus(LPVAL params, ExpReturn& ret);
@@ -120,8 +122,8 @@ public:
 	//Nunchuk Actions
 
 	//Nunchuk Conditions
-	long cNunConnected(LPVAL params, ExpReturn &ret);
-	long cNunDisconnected(LPVAL params, ExpReturn &ret);
+	long cNunConnected(LPVAL params);
+	long cNunDisconnected(LPVAL params);
 
 	//Nunchuk Expressions
 	long eNunJoyX(LPVAL params, ExpReturn &ret);
@@ -135,10 +137,12 @@ public:
 	long eNunOriY(LPVAL params, ExpReturn &ret);
 	long eNunOriZ(LPVAL params, ExpReturn &ret);
 	long eNunUpdateAge(LPVAL params, ExpReturn &ret);
+	long eNunDeadzoneX(LPVAL params, ExpReturn &ret);
+	long eNunDeadzoneY(LPVAL params, ExpReturn &ret);
 
 	vector<RunControl> controls;
 
-	//calculated, possibley smoothed IR values 0-1.0
+	//calculated, possibly smoothed IR values 0-1.0
 	float calcX;
 	float calcY;
 	float calcZ;

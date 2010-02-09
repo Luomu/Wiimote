@@ -68,7 +68,7 @@ STRINGTABLE
 BEGIN
     OBJ_NAME                "Wiimote"
     OBJ_AUTHOR              "K. K."
-    OBJ_VERSION             "1.00"
+    OBJ_VERSION             "1.01"
     OBJ_DESCRIPTION         "Wiimote plugin."
     OBJ_DATE                "Oct 09"
     OBJ_COPYRIGHT           "No copyright"

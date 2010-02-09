@@ -57,6 +57,10 @@ void DefineACES(MicroAceTime* at)
 	ADDPARAM(PARAM_VALUE, "Led 3", "0 = off, 1 = on.");
 	ADDACT("Set LEDs", "Remote", "Set LEDs to %0 %1 %2 %3", &ExtObject::aSetLeds, "SetLEDs", 0);
 
+	ADDPARAM(PARAM_VALUE, "X axis", "0.0 - 1.0, default 0.03");
+	ADDPARAM(PARAM_VALUE, "Y axis", "0.0 - 1.0, default 0.03");
+	ADDACT("Set joystick deadzone", "Nunchuk", "Set joystick X, Y deadzone to %0, %0", &ExtObject::aSetNunDeadzone, "SetNunDeadzone", 0);
+
 	/////////////////////////////
 	// Expressions
 	// ADDEXP(List name, Category, Display string, Function address, Flags)
@@ -97,6 +101,8 @@ void DefineACES(MicroAceTime* at)
 	ADDEXP("Nunchuk Orientation Y", "Nunchuk", "NunOriY", &ExtObject::eNunOriY, RETURN_FLOAT);
 	ADDEXP("Nunchuk Orientation Z", "Nunchuk", "NunOriZ", &ExtObject::eNunOriZ, RETURN_FLOAT);
 	ADDEXP("Nunchuk Update age", "Nunchuk", "NunUpdateAge", &ExtObject::eNunUpdateAge, RETURN_INTEGER);
+	ADDEXP("Nunchuk Deadzone X", "Nunchuk", "NunDeadzoneX", &ExtObject::eNunDeadzoneX, RETURN_FLOAT);
+	ADDEXP("Nunchuk Deadzone Y", "Nunchuk", "NunDeadzoneY", &ExtObject::eNunDeadzoneY, RETURN_FLOAT);
 
 	// This line includes your common ACEs as specified in Main.h
 #include "..\Common\CommonAceTable.hpp"

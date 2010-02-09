@@ -175,3 +175,15 @@ long ExtObject::eNunUpdateAge(LPVAL params, ExpReturn &ret)
 {
 	return ret = remote.Nunchuk.Acceleration.Orientation.UpdateAge;
 }
+
+
+long ExtObject::eNunDeadzoneX( LPVAL params, ExpReturn &ret )
+{
+	return ret = remote.Nunchuk.Joystick.DeadZone.X;
+}
+
+
+long ExtObject::eNunDeadzoneY( LPVAL params, ExpReturn &ret )
+{
+	return ret = remote.Nunchuk.Joystick.DeadZone.Y;
+}
