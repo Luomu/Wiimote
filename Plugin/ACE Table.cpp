@@ -57,10 +57,6 @@ void DefineACES(MicroAceTime* at)
 	ADDPARAM(PARAM_VALUE, "Led 3", "0 = off, 1 = on.");
 	ADDACT("Set LEDs", "Remote", "Set LEDs to %0 %1 %2 %3", &ExtObject::aSetLeds, "SetLEDs", 0);
 
-	ADDPARAM(PARAM_VALUE, "X axis", "0.0 - 1.0, default 0.03");
-	ADDPARAM(PARAM_VALUE, "Y axis", "0.0 - 1.0, default 0.03");
-	ADDACT("Set joystick deadzone", "Nunchuk", "Set joystick X, Y deadzone to %0, %0", &ExtObject::aSetNunDeadzone, "SetNunDeadzone", 0);
-
 	/////////////////////////////
 	// Expressions
 	// ADDEXP(List name, Category, Display string, Function address, Flags)
@@ -85,6 +81,9 @@ void DefineACES(MicroAceTime* at)
 	ADDEXP("Update age", "Status", "UpdateAge", &ExtObject::eUpdateAge, RETURN_INTEGER);
 
 	//Nunchuk actions
+	ADDPARAM(PARAM_VALUE, "X axis", "0.0 - 1.0, default 0.03");
+	ADDPARAM(PARAM_VALUE, "Y axis", "0.0 - 1.0, default 0.03");
+	ADDACT("Set joystick deadzone", "Nunchuk", "Set joystick X, Y deadzone to %0, %0", &ExtObject::aSetNunDeadzone, "SetNunDeadzone", 0);
 
 	//Nunchuk conditions
 	ADDCND("Nunchuk Connected", "Nunchuk", "%o Nunchuk connected", &ExtObject::cNunConnected, "NunchukConnected", 0);
