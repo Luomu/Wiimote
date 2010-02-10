@@ -1,6 +1,6 @@
 // _______________________________________________________________________________
 //
-//	 - WiiYourself! - native C++ Wiimote library  v1.14 BETA
+//	 - WiiYourself! - native C++ Wiimote library  v1.15 RC2
 //	  (c) gl.tter 2007-9 - http://gl.tter.org
 //
 //	  see License.txt for conditions of use.  see History.txt for change log.
@@ -20,10 +20,8 @@
 #include <tchar.h>		// auto Unicode/Ansi support
 #include <queue>		// for HID write method
 #include <list>			// for state recording
- using namespace std;
-
  
-#ifdef _MSC_VER  // VC-specific: _DEBUG build only _ASSERT() sanity checks
+#ifdef _MSC_VER			   // VC-specific: _DEBUG build only _ASSERT() sanity checks
 # include <crtdbg.h>
 #elif defined(__MINGW32__) // define NDEBUG to disable assert
 # include <assert.h>
@@ -32,36 +30,56 @@
 # define _ASSERT(x) ((void)0) // (add your compiler's implementation if you like)
 #endif
 
+#ifdef SWIGWRAPPER		// Python Wrapper
+#include "Python/wiimote_state.i"
+#else
 #include "wiimote_state.h"
+#endif
 
 // configs:
  //  we request periodic status report updates to refresh the battery level
 //   and to detect connection loss (through failed writes)
 #define REQUEST_STATUS_EVERY_MS		1000
+#define DETECT_MPLUS_EVERY_MS		1000
+#define DETECT_MPLUS_COUNT			3	 // # of tries in quick succession
+
 //  all threads (read/parse, audio streaming, async rumble...) use this priority
 #define WORKER_THREAD_PRIORITY		THREAD_PRIORITY_HIGHEST
 
  // internals
 #define	WIIYOURSELF_VERSION_MAJOR	1
 #define	WIIYOURSELF_VERSION_MINOR1	1
-#define	WIIYOURSELF_VERSION_MINOR2	4
+#define	WIIYOURSELF_VERSION_MINOR2	5
 #define WIIYOURSELF_VERSION_BETA	// undefined for non-beta releases
-#define WIIYOURSELF_VERSION_STR		_T("1.14 BETA")
+#define WIIYOURSELF_VERSION_STR		_T("1.15 RC2 ")
 
-// clarity
+// array sizes
+#define	TOTAL_BUTTON_BITS	16	// Number of bits for (Classic)ButtonNameFromBit[]
+#define	TOTAL_FREQUENCIES	10	// Number of frequencies (see speaker_freq[])
+
+ // clarity
 typedef HANDLE EVENT;
 
 
 // state data changes can be signalled to the app via a callback.  Set the wiimote
-//  object's 'ChangedCallback' any time to enable them.  'changed' is a combination
+//  object's 'ChangedCallback' any time to enable them, or alternatively inherit
+//   from the wiimote object and override the ChangedNotifier() virtual method.
+
 //  of flags indicating which state has changed since the last callback.
-typedef void (*state_changed_callback)	(class wiimote	    &owner,
-										 state_change_flags changed);
+typedef void (*state_changed_callback)	(class wiimote	     &owner,
+										 state_change_flags  changed,
+										 const wiimote_state &new_state);
 
 // internals
 typedef BOOLEAN (__stdcall *hidwrite_ptr)(HANDLE HidDeviceObject,
 										  PVOID  ReportBuffer,
 										  ULONG  ReportBufferLength);
+
+// (global due to Python wrapper)
+struct wiimote_state_event {
+	DWORD		  time_ms;	// system timestamp in milliseconds
+	wiimote_state state;
+	};
 
 // wiimote class - connects and manages a wiimote and its optional extensions
 //                 (Nunchuk/Classic Controller), and exposes their state
@@ -91,6 +109,8 @@ class wiimote : public wiimote_state
 			IN_BUTTONS_ACCEL_IR_EXT	 = 0x37, // reports IR BASIC data (no dot sizes)
 			IN_BUTTONS_BALANCE_BOARD = 0x32, // must use this for the balance board
 			};
+		// string versions 
+		static const TCHAR* ReportTypeName [];
 
 
 	public: // convenience accessors:
@@ -118,17 +138,43 @@ class wiimote : public wiimote_state
 
 	public: // data
 		// optional callbacks - set these to your own fuctions (if required)
-		state_changed_callback   ChangedCallback;
+		state_changed_callback  ChangedCallback;
 		//  you can avoid unnecessary callback overhead by specifying a mask
 		//   of which state changes should trigger them (default is any)
-		state_change_flags		 CallbackTriggerFlags;
+		state_change_flags		CallbackTriggerFlags;
+		// alternatively, inherit from this class and override this virtual function:
+		virtual void			ChangedNotifier (state_change_flags  changed,
+												 const wiimote_state &new_state) {};
 
 		// get the button name from its bit index (some bits are unused)
-		static const TCHAR*		 ButtonNameFromBit		  [16];
+		static const TCHAR*		   ButtonNameFromBit [TOTAL_BUTTON_BITS];
+		static const TCHAR*		GetButtonNameFromBit (unsigned index)
+			{
+			_ASSERT(index < TOTAL_BUTTON_BITS);
+			if(index >= TOTAL_BUTTON_BITS)
+				return _T("[invalid index]");
+			return ButtonNameFromBit[index];
+			}
+
 		// same for the Classic Controller
-		static const TCHAR*		 ClassicButtonNameFromBit [16];
+		static const TCHAR*		   ClassicButtonNameFromBit [TOTAL_BUTTON_BITS];
+		static const TCHAR*		GetClassicButtonNameFromBit (unsigned index)
+			{
+			_ASSERT(index < TOTAL_BUTTON_BITS);
+			if(index >= TOTAL_BUTTON_BITS)
+				return _T("[invalid index]");
+			return ClassicButtonNameFromBit[index];
+			}
+
 		// get the frequency from speaker_freq enum
-		static const unsigned	 FreqLookup				  [10];
+		static const unsigned	   FreqLookup [TOTAL_FREQUENCIES];
+		static const unsigned	GetFreqLookup (unsigned index)
+			{
+			_ASSERT(index < TOTAL_FREQUENCIES);
+			if(index >= TOTAL_FREQUENCIES)
+				return 0;
+			return FreqLookup[index];
+			}
 
 	public: // methods
 		// call Connect() first - returns true if wiimote was found & enabled
@@ -174,7 +220,7 @@ class wiimote : public wiimote_state
 		//  the wiimote object) you must call RefreshState() at the top of every pass.
 		//  returns a combination of flags to indicate which state (if any) has
 		//  changed since the last call.
-		inline state_change_flags RefreshState ()	{ return _RefreshState(false); }
+		state_change_flags RefreshState ();
 
 		// reset the wiimote (changes report type to non-continuous buttons-only,
 		//					  clears LEDs & rumble, mutes & disables speaker)
@@ -198,28 +244,27 @@ class wiimote : public wiimote_state
 
 		//  16bit mono sample loading/conversion to native format:
 		//   .wav sample
-		static bool Load16bitMonoSampleWAV	 (const TCHAR* filepath,
+		static bool Load16bitMonoSampleWAV	 (const TCHAR*   filepath,
 											  wiimote_sample &out);
 		//   raw 16bit mono audio data (can be signed or unsigned)
-		static bool Load16BitMonoSampleRAW	 (const TCHAR* filepath,
-											  bool		   _signed,
-											  speaker_freq freq,
+		static bool Load16BitMonoSampleRAW	 (const TCHAR*   filepath,
+											  bool		     _signed,
+											  speaker_freq   freq,
 											  wiimote_sample &out);
 		//   converts a 16bit mono sample array to a wiimote_sample
-		static bool Convert16bitMonoSamples  (const short* samples,
-											  bool		   _signed,
-											  DWORD		   length,
-											  speaker_freq freq,
+		static bool Convert16bitMonoSamples  (const short*   samples,
+											  bool		     _signed,
+											  DWORD		     length,
+											  speaker_freq   freq,
 											  wiimote_sample &out);
 		
 		// state recording - records state snapshots to a 'state_history' supplied
 		//					  by the caller.  states are timestamped and only added
 		//					  to the list when the specified state changes.
-		struct state_event {
-			DWORD		  time_ms;	// system timestamp in milliseconds
-			wiimote_state state;
-			};
-		typedef list<state_event> state_history;
+#ifndef SWIG // !Python Wrapper
+		typedef wiimote_state_event state_event;
+#endif
+		typedef std::list<state_event> state_history;
 		static const unsigned UNTIL_STOP = 0xffffffff;
 		// - pass in a 'state_history' list, and don't destroy/change it until
 		//	  recording is stopped.  note the list will be cleared first.
@@ -281,9 +326,6 @@ class wiimote : public wiimote_state
 		// returns the rumble BYTE that needs to be sent with reports.
 		inline BYTE  GetRumbleBit	()	const { return Internal.bRumble? 0x01 : 0x00; }
 
-		// copy the accumulated parsed state into the public state
-		state_change_flags _RefreshState (bool for_callbacks);
-
 		// static thread funcs:
 		static unsigned __stdcall ReadParseThreadfunc   (void* param);
 		static unsigned __stdcall AsyncRumbleThreadfunc (void* param);
@@ -341,32 +383,35 @@ class wiimote : public wiimote_state
 		static hidwrite_ptr _HidD_SetOutputReport;
 		
 		volatile bool	 bStatusReceived;	  // for output method detection
+		volatile bool	 bConnectInProgress;  // don't handle extensions until complete
+		volatile bool	 bInitInProgress;	  // stop regular requests until complete
 		volatile bool	 bConnectionLost;	  // auto-Disconnect()s if set
-		volatile bool	 bDetectingMotionPlus;// waiting for the result
+volatile int	 MotionPlusDetectCount;		  // waiting for the result
 		volatile bool	 bMotionPlusDetected;
 		volatile bool	 bMotionPlusEnabled;
 		volatile bool	 bMotionPlusExtension;// detected one plugged into MotionPlus
-		volatile bool	 bCalibrateAtRest;	  // as soon as the first sensor values come
-											  //  in after a Connect() call.
+		volatile bool	 bCalibrateAtRest;	  // as soon as the first sensor values 											  //  come in after a Connect() call.
 		static unsigned	 _TotalCreated;
 		static unsigned	 _TotalConnected;
-		input_report	 ReportType;	  // type of data the wiimote delivers	
+		input_report	 ReportType;	      // type of data the wiimote delivers	
 		// read buffer
 		BYTE			 ReadBuff  [REPORT_LENGTH];
-		// for polling: state is updated on a thread internally, and made public
-		//  via _RefreshState()
+		// for polling: state is updated on a thread internally, and made only
+		//  made public via RefreshState()
 		CRITICAL_SECTION StateLock;	
 		wiimote_state	 Internal;
-		state_change_flags InternalChanged; // state changes since last RefreshState()
+		state_change_flags InternalChanged;   // state changes since last RefreshState()
 		// periodic status report requests (for battery level and connection loss
 		//  detection)
-		DWORD			 NextStatusTime;
+		DWORD			  NextStatusTime;
+		DWORD			  NextMPlusDetectTime;// gap between motion plus detections
+		DWORD			  MPlusDetectCount;	  // # of detection tries in quick succesion
 		// async Hidd_WriteReport() thread
-		HANDLE			 HIDwriteThread;
-		queue<BYTE*>	 HIDwriteQueue;
-		CRITICAL_SECTION HIDwriteQueueLock;	// queue must be locked before being modified
+		HANDLE			  HIDwriteThread;
+		std::queue<BYTE*> HIDwriteQueue;
+		CRITICAL_SECTION  HIDwriteQueueLock;  // queue must be locked before being modified
 		// async rumble
-		HANDLE			 AsyncRumbleThread;	// automatically disables rumble if requested
+		HANDLE			 AsyncRumbleThread;	  // automatically disables rumble if requested
 		volatile DWORD	 AsyncRumbleTimeout;
 		// orientation estimation
 		unsigned		 WiimoteNearGUpdates;
