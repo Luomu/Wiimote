@@ -140,6 +140,16 @@ public:
 	long eNunDeadzoneX(LPVAL params, ExpReturn &ret);
 	long eNunDeadzoneY(LPVAL params, ExpReturn &ret);
 
+	//Balance board
+	//Actions
+
+	//Conditions
+	long cIsBalanceBoard(LPVAL params);
+
+	//Expressions
+	long eWeight(LPVAL params, ExpReturn& ret);
+
+
 	vector<RunControl> controls;
 
 	//calculated, possibly smoothed IR values 0-1.0

@@ -103,6 +103,15 @@ void DefineACES(MicroAceTime* at)
 	ADDEXP("Nunchuk Deadzone X", "Nunchuk", "NunDeadzoneX", &ExtObject::eNunDeadzoneX, RETURN_FLOAT);
 	ADDEXP("Nunchuk Deadzone Y", "Nunchuk", "NunDeadzoneY", &ExtObject::eNunDeadzoneY, RETURN_FLOAT);
 
+	//Balance board actions
+	//Balance board conditions
+	ADDCND("Is balance board", "Balance board", "%0 is balance board", &ExtObject::cIsBalanceBoard, "IsBalanceBoard", 0);
+	
+	//Balance board expressions
+	//ADDPARAMCOMBO("Sensor", "Sensor to read from", "Total|Top Left|Top Right|Bottom Left|Bottom Right");
+	ADDPARAM(PARAM_VALUE, "1", "Weight sensor to read from (1=Total, Top Left, Top Right, Bottom Left, 5=Bottom Right");
+	ADDEXP("Weight", "Balance board", "Weight", &ExtObject::eWeight, RETURN_FLOAT);
+
 	// This line includes your common ACEs as specified in Main.h
 #include "..\Common\CommonAceTable.hpp"
 }

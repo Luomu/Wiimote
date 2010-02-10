@@ -187,3 +187,30 @@ long ExtObject::eNunDeadzoneY( LPVAL params, ExpReturn &ret )
 {
 	return ret = remote.Nunchuk.Joystick.DeadZone.Y;
 }
+
+long ExtObject::eWeight( LPVAL params, ExpReturn& ret )
+{
+	//Total|TopL|TopR|BottomL|BottomR
+	int sensor = params[0].GetInt();
+
+	switch(sensor) {
+		case 1:
+			ret = remote.BalanceBoard.Kg.Total;
+			break;
+		case 2:
+			ret = remote.BalanceBoard.Kg.TopL;
+			break;
+		case 3:
+			ret = remote.BalanceBoard.Kg.TopR;
+			break;
+		case 4:
+			ret = remote.BalanceBoard.Kg.BottomL;
+			break;
+		case 5:
+			ret = remote.BalanceBoard.Kg.BottomR;
+			break;
+		default:
+			ret = 0;
+	}
+	return ret = ret;
+}

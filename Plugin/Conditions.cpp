@@ -95,3 +95,11 @@ long ExtObject::cNunConnected(LPVAL params)
 
 	return remote.NunchukConnected();
 }
+
+long ExtObject::cIsBalanceBoard(LPVAL params)
+{
+	if(!remote.IsConnected())
+		return false;
+
+	return remote.IsBalanceBoard();
+}
