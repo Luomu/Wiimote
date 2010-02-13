@@ -142,12 +142,17 @@ public:
 
 	//Balance board
 	//Actions
+	long aResetWeightCalibration(LPVAL params);
 
 	//Conditions
 	long cIsBalanceBoard(LPVAL params);
 
 	//Expressions
-	long eWeight(LPVAL params, ExpReturn& ret);
+	long eTotalWeight(LPVAL params, ExpReturn& ret);
+	long eTopLeftWeight(LPVAL params, ExpReturn& ret);
+	long eTopRightWeight(LPVAL params, ExpReturn& ret);
+	long eBottomLeftWeight(LPVAL params, ExpReturn& ret);
+	long eBottomRightWeight(LPVAL params, ExpReturn& ret);
 
 
 	vector<RunControl> controls;

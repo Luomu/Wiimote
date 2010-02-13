@@ -104,13 +104,18 @@ void DefineACES(MicroAceTime* at)
 	ADDEXP("Nunchuk Deadzone Y", "Nunchuk", "NunDeadzoneY", &ExtObject::eNunDeadzoneY, RETURN_FLOAT);
 
 	//Balance board actions
+	//ADDACT("My action", "My category", "Example action (%0)", &ExtObject::aMyAction, "MyAction", 0);
+	ADDACT("Reset weight calibration", "Balance board", "Reset weight calibration", &ExtObject::aResetWeightCalibration, "ResetWeightCalibration", 0 );
 	//Balance board conditions
 	ADDCND("Is balance board", "Balance board", "%0 is balance board", &ExtObject::cIsBalanceBoard, "IsBalanceBoard", 0);
 	
 	//Balance board expressions
-	//ADDPARAMCOMBO("Sensor", "Sensor to read from", "Total|Top Left|Top Right|Bottom Left|Bottom Right");
-	ADDPARAM(PARAM_VALUE, "1", "Weight sensor to read from (1=Total, Top Left, Top Right, Bottom Left, 5=Bottom Right");
-	ADDEXP("Weight", "Balance board", "Weight", &ExtObject::eWeight, RETURN_FLOAT);
+	// ADDEXP(List name, Category, Display string, Function address, Flags)
+	ADDEXP("Total weight", "Balance board", "Total weight", &ExtObject::eTotalWeight, 0);
+	ADDEXP("Top left weight", "Balance board", "Top left weight", &ExtObject::eTopLeftWeight, 0);
+	ADDEXP("Top right weight", "Balance board", "Top right weight", &ExtObject::eTopRightWeight, 0);
+	ADDEXP("Bottom left weight", "Balance board", "Bottom left weight", &ExtObject::eBottomLeftWeight, 0);
+	ADDEXP("Bottom right weight", "Balance board", "Bottom right weight", &ExtObject::eBottomRightWeight, 0);
 
 	// This line includes your common ACEs as specified in Main.h
 #include "..\Common\CommonAceTable.hpp"

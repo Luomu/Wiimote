@@ -83,3 +83,12 @@ long ExtObject::aSetNunDeadzone( LPVAL params )
 
 	return 0;
 }
+
+
+long ExtObject::aResetWeightCalibration( LPVAL params )
+{
+	if(!remote.IsBalanceBoard())
+		return 0;
+
+	remote.CalibrateAtRest();
+}
