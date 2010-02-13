@@ -91,4 +91,5 @@ long ExtObject::aResetWeightCalibration( LPVAL params )
 		return 0;
 
 	remote.CalibrateAtRest();
+	return 0;
 }
