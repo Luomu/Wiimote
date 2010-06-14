@@ -84,7 +84,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="C:\Program Files\Scirra\Construct9982\Plugins\Wiimote.csx"
+				OutputFile="C:\Program Files\Scirra\Construct\Plugins\Wiimote.csx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="c:\WinDDK\7600.16385.0\lib\win7\i386"
@@ -196,7 +196,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="C:\Program Files\Scirra\Construct9982\Plugins\Runtime\Wiimote.csx"
+				OutputFile="C:\Program Files\Scirra\Construct\Plugins\Runtime\Wiimote.csx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="c:\WinDDK\7600.16385.0\lib\win7\i386"
@@ -400,7 +400,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="C:\Program Files\Scirra\Construct9982\Plugins\Runtime\Wiimote.csx"
+				OutputFile="C:\Program Files\Scirra\Construct\Plugins\Runtime\Wiimote.csx"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="c:\WinDDK\7600.16385.0\lib\win7\i386"
@@ -885,7 +885,7 @@
 				>
 			</File>
 			<File
-				RelativePath="res\ICON.BMP"
+				RelativePath="ICON.BMP"
 				>
 				<FileConfiguration
 					Name="Runtime|Win32"
@@ -897,7 +897,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ICON.BMP"
+				RelativePath="res\ICON.BMP"
 				>
 				<FileConfiguration
 					Name="Runtime|Win32"
