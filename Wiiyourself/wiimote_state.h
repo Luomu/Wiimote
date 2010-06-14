@@ -1,7 +1,7 @@
 // _______________________________________________________________________________
 //
-//	 - WiiYourself! - native C++ Wiimote library  v1.15 RC2
-//	  (c) gl.tter 2007-9 - http://gl.tter.org
+//	 - WiiYourself! - native C++ Wiimote library  v1.15
+//	  (c) gl.tter 2007-10 - http://gl.tter.org
 //
 //	  see License.txt for conditions of use.  see History.txt for change log.
 // _______________________________________________________________________________
@@ -113,9 +113,9 @@ struct wiimote_state
 		//  below, so I'm using them instead to give the full 0-1 float range
 		//  (it's possible that the edge pixels are used for processing, or masked
 		//  out due to being unreliable).  let me know if your wiimote reports
-		//  a different rage.
+		//  a different range.
 		static const unsigned MAX_RAW_X = 1016;
-		static const unsigned MAX_RAW_Y = 760;
+		static const unsigned MAX_RAW_Y =  760;
 
 		// data mode reported by the IR sensor
 		enum mode
@@ -307,7 +307,7 @@ struct wiimote_state
 			float BottomL;
 			float BottomR;
 			
-			float Total; // all 4 combined
+			float Total; // sum of the 4 corner weights
 			};
 
 		// calibration info

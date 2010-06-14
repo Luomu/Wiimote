@@ -1,7 +1,7 @@
 // _______________________________________________________________________________
 //
-//	 - WiiYourself! - native C++ Wiimote library  v1.15 RC2
-//	  (c) gl.tter 2007-9 - http://gl.tter.org
+//	 - WiiYourself! - native C++ Wiimote library  v1.15
+//	  (c) gl.tter 2007-10 - http://gl.tter.org
 //
 //	  see License.txt for conditions of use.  see History.txt for change log.
 // _______________________________________________________________________________
@@ -38,6 +38,11 @@ extern "C" {
 #endif
 #include <mmreg.h>		// for WAVEFORMATEXTENSIBLE
 #include <mmsystem.h>	// for timeGetTime()
+
+// apparently not defined in some compilers:
+#ifndef min
+# define min(a,b)	(((a) < (b)) ? (a) : (b))
+#endif
 // ------------------------------------------------------------------------------------
 // helpers
 // ------------------------------------------------------------------------------------
@@ -129,6 +134,7 @@ wiimote::wiimote ()
 	bStatusReceived		 (false), // for output method detection
 	bConnectInProgress	 (true ),
 	bInitInProgress		 (false),
+	bEnablingMotionPlus	 (false),
 	bConnectionLost		 (false), // set if write fails after connection
 	bMotionPlusDetected	 (false),
 	bMotionPlusEnabled	 (false),
@@ -143,7 +149,11 @@ wiimote::wiimote ()
 	ReadParseThread		 (NULL),
 	SampleThread		 (NULL),
 	AsyncRumbleThread	 (NULL),
-	AsyncRumbleTimeout	 (0)
+	AsyncRumbleTimeout	 (0),
+	UniqueID			 (0)	// not _guaranteed_ unique, see comments in header
+#ifdef ID2_FROM_DEVICEPATH		// (see comments in header)
+	// UniqueID2			 (0)	
+#endif
 	{
 	_ASSERT(DataRead != INVALID_HANDLE_VALUE);
 				
@@ -228,7 +238,7 @@ bool wiimote::Connect (unsigned wiimote_index, bool force_hidwrites)
 
 	// get a handle to all devices that are part of the HID class
 	// Brian: Fun fact:  DIGCF_PRESENT worked on my machine just fine.  I reinstalled
-	//        Vista, and now it no longer finds the Wiimote with that parameter enabled...
+	//   Vista, and now it no longer finds the Wiimote with that parameter enabled...
 	HDEVINFO dev_info = SetupDiGetClassDevs(&guid, NULL, NULL, DIGCF_DEVICEINTERFACE);// | DIGCF_PRESENT);
 	if(!dev_info) {
 		WARN(_T("couldn't get device info"));
@@ -262,7 +272,7 @@ bool wiimote::Connect (unsigned wiimote_index, bool force_hidwrites)
 			}
 
 		// open a shared handle to the device to query it (this will succeed even
-		//  if the wiimote is already Connect()ed)
+		//  if the wiimote is already Connect()'ed)
 		DEEP_TRACE(_T(".. querying device %s"), didetail->DevicePath);
 		Handle = CreateFile(didetail->DevicePath, 0, FILE_SHARE_READ|FILE_SHARE_WRITE,
 												  NULL, OPEN_EXISTING, 0, NULL);
@@ -293,10 +303,22 @@ bool wiimote::Connect (unsigned wiimote_index, bool force_hidwrites)
 			else
 				TRACE(_T(".. opening:"));
 
+
 			// re-open the handle, but this time we don't allow write sharing
 			//  (that way subsequent calls can still _discover_ wiimotes above, but
 			//   will correctly fail here if they're already connected)
 			CloseHandle(Handle);
+			
+			// note this also means that if another application has already opened
+			//  the device, the library can no longer connect it (this may happen
+			//  with software that enumerates all joysticks in the system, because
+			//  even though the wiimote is not a standard joystick (and can't
+			//  be read as such), it unfortunately announces itself to the OS
+			//  as one.  The SDL library was known to do grab wiimotes like this.
+			//  If you cannot stop the application from doing it, you may change the
+			//  call below to open the device in full shared mode - but then the
+			//  library can no longer detect if you've already connected a device
+			//  and will allow you to connect it twice!  So be careful ...
 			Handle = CreateFile(didetail->DevicePath, GENERIC_READ|GENERIC_WRITE,
 													FILE_SHARE_READ,
 													NULL, OPEN_EXISTING,
@@ -334,7 +356,7 @@ bool wiimote::Connect (unsigned wiimote_index, bool force_hidwrites)
 				//  and wait for the report to arrive:
 				DWORD last_time = timeGetTime();
 				while(!bStatusReceived && ((timeGetTime()-last_time) < 500))
-					Sleep(5);
+					Sleep(10);
 				TRACE(_T(".. WriteFile() %s."), bStatusReceived? _T("succeeded") :
 																 _T("failed"));
 				}
@@ -347,7 +369,7 @@ bool wiimote::Connect (unsigned wiimote_index, bool force_hidwrites)
 				// wait for the report to arrive:
 				DWORD last_time = timeGetTime();
 				while(!bStatusReceived && ((timeGetTime()-last_time) < 500))
-					Sleep(5);
+					Sleep(10);
 				// did we get it?
 				TRACE(_T(".. HID write %s."), bStatusReceived? _T("succeeded") :
 															   _T("failed"));
@@ -360,26 +382,43 @@ bool wiimote::Connect (unsigned wiimote_index, bool force_hidwrites)
 				goto skip;
 				}
 
-Sleep(500);
+//Sleep(500);
+			// reset it
+			Reset();
+
 			// read the wiimote calibration info
 			ReadCalibration();
 
+			// allow the result(s) to come in (so that the caller can immediately test
+			//  MotionPlusConnected()
+			Sleep(300); // note, don't need it on my system, better to be safe though
+
 			// connected succesfully:
 			_TotalConnected++;
-			// reset it
-			Reset();
 
 			// use the first incomding analogue sensor values as the 'at rest'
 			//  offsets (only supports the Balance Board currently)
 			bCalibrateAtRest = true;
 
-			// allow the result(s) to come in (so that the caller can immediately test
-			//  MotionPlusConnected()
-			Sleep(100); // note, don't need it on my system, better to be safe though
-
 			// refresh the public state from the internal one (so that everything
 			//  is available straight away
 			RefreshState();
+
+			// attempt to construct a unique hardware ID from the calibration
+			//  data bytes (this is obviously not guaranteed to be unique across
+			//  all devices, but may work fairly well in practice... ?)
+			memcpy(&UniqueID, &CalibrationInfo, sizeof(CalibrationInfo));
+
+			_ASSERT(UniqueID != 0); // if this fires, the calibration data didn't
+									//  arrive - this shouldn't happen
+
+#ifdef ID2_FROM_DEVICEPATH		// (see comments in header)
+			// create a 2nd alternative id by simply adding all the characters
+			//  in the device path to create a single number
+			UniqueID2 = 0;
+			for(unsigned index=0; index<_tcslen(didetail->DevicePath); index++)
+				UniqueID2 += didetail->DevicePath[index];
+#endif
 			// and show when we want to trigger the next periodic status request
 			//  (for battery level and connection loss detection)
 			NextStatusTime		= timeGetTime() + REQUEST_STATUS_EVERY_MS;
@@ -458,6 +497,10 @@ void wiimote::Disconnect ()
 
 	CloseHandle(Handle);
 	Handle = INVALID_HANDLE_VALUE;
+	UniqueID  = 0;
+#ifdef ID2_FROM_DEVICEPATH		// (see comments in header)
+	UniqueID2 = 0;
+#endif
 
 	// close the read thread
 	if(ReadParseThread) {
@@ -480,6 +523,10 @@ void wiimote::Disconnect ()
 		CloseHandle(SampleThread);
 		SampleThread = NULL;
 		}
+
+#ifndef USE_DYNAMIC_HIDQUEUE
+	HID.Deallocate();
+#endif
 
 	bStatusReceived = false;
 
@@ -553,7 +600,8 @@ connection_lost:
 		DWORD time = timeGetTime();
 		//  periodic events (but not if we're streaming audio,
 		//					 we don't want to cause a glitch)
-		if(remote.IsConnected() && !remote.IsPlayingAudio())
+		if(remote.IsConnected() && !remote.bInitInProgress &&
+		   !remote.IsPlayingAudio())
 			{
 			// status request due? 
 			if(time > remote.NextStatusTime)
@@ -568,7 +616,6 @@ connection_lost:
 			// motion plus detection due?
 			if(!remote.IsBalanceBoard()		&&
 //			   !remote.bConnectInProgress   &&
-			   !remote.bInitInProgress		&&
 			   !remote.bMotionPlusExtension &&
 			   (remote.Internal.ExtensionType != MOTION_PLUS) &&
 			   (remote.Internal.ExtensionType != PARTIALLY_INSERTED) &&
@@ -703,8 +750,8 @@ void wiimote::SetReportType (input_report type, bool continuous)
 						TYPE2NAME(IN_BUTTONS_ACCEL_IR_EXT)	:
 						TYPE2NAME(IN_BUTTONS_BALANCE_BOARD) :
 						_T("(unknown??)");
-	TRACE(_T("ReportType = %s (%s)"), name, (continuous? _T("continuous") :
-														 _T("non-continuous")));
+	TRACE(_T("ReportType: %s (%s)"), name, (continuous? _T("continuous") :
+														_T("non-continuous")));
 #endif
 	ReportType = type;
 
@@ -726,14 +773,13 @@ void wiimote::SetReportType (input_report type, bool continuous)
 	buff[1] = (continuous ? 0x04 : 0x00) | GetRumbleBit();
 	buff[2] = (BYTE)type;
 	WriteReport(buff);
-
 //	Sleep(15);
 	}
 // ------------------------------------------------------------------------------------
 void wiimote::SetLEDs (BYTE led_bits)
 	{
 	_ASSERT(IsConnected());
-	if(!IsConnected())
+	if(!IsConnected() || bInitInProgress)
 		return;
 
 	_ASSERT(led_bits <= 0x0f);
@@ -875,12 +921,14 @@ int wiimote::ParseInput (BYTE* buff)
 			DEEP_TRACE(_T(".. parsing buttons."));
 			changed |= ParseButtons(buff);
 			break;
+
 		case IN_BUTTONS_ACCEL:
 			DEEP_TRACE(_T(".. parsing buttons/accel."));
 			changed |= ParseButtons(buff);
 			if(!IsBalanceBoard())
 				changed |= ParseAccel(buff);
 			break;
+
 		case IN_BUTTONS_ACCEL_EXT:
 			DEEP_TRACE(_T(".. parsing extenion/accel."));
 			changed |= ParseButtons(buff);
@@ -888,6 +936,7 @@ int wiimote::ParseInput (BYTE* buff)
 			if(!IsBalanceBoard())
 				changed |= ParseAccel(buff);
 			break;
+
 		case IN_BUTTONS_ACCEL_IR:
 			DEEP_TRACE(_T(".. parsing ir/accel."));
 			changed |= ParseButtons(buff);
@@ -896,6 +945,7 @@ int wiimote::ParseInput (BYTE* buff)
 				changed |= ParseIR(buff);
 				}
 			break;
+
 		case IN_BUTTONS_ACCEL_IR_EXT:
 			DEEP_TRACE(_T(".. parsing ir/extenion/accel."));
 			changed |= ParseButtons(buff);
@@ -905,24 +955,25 @@ int wiimote::ParseInput (BYTE* buff)
 				changed |= ParseIR	   (buff);
 				}
 			break;
+
 		case IN_BUTTONS_BALANCE_BOARD:
 			DEEP_TRACE(_T(".. parsing buttson/balance."));
 			changed |= ParseButtons(buff);
 			changed |= ParseExtension(buff, 3);
 			break;
+
 		case IN_READADDRESS:
 			DEEP_TRACE(_T(".. parsing read address."));
 			changed |= ParseButtons	   (buff);
 			changed |= ParseReadAddress(buff);
 			break;
+
 		case IN_STATUS:
-			{
 			DEEP_TRACE(_T(".. parsing status."));
 			changed |= ParseStatus(buff);
 			// show that we received the status report (used for output method
 			//  detection during Connect())
 			bStatusReceived = true;
-			}
 			break;
 		
 		default:
@@ -947,6 +998,8 @@ int wiimote::ParseInput (BYTE* buff)
 	// for polling: show which state has changed since the last RefreshState()
 	InternalChanged = (state_change_flags)(InternalChanged | changed);
 
+	LeaveCriticalSection(&StateLock);
+
 	// callbacks: call it (if set & state the app is interested in has changed)
 	if(changed & CallbackTriggerFlags)
 		{
@@ -956,8 +1009,6 @@ int wiimote::ParseInput (BYTE* buff)
 			ChangedCallback(*this, (state_change_flags)changed, Internal);
 		}
 	
-	LeaveCriticalSection(&StateLock);
-
 	DEEP_TRACE(_T(".. parse complete."));
 	return true;
 	}
@@ -1019,6 +1070,8 @@ bool wiimote::EnableMotionPlus ()
 	TRACE(_T("Enabling Motion Plus:"));
 	
 	bMotionPlusExtension = false;
+	bInitInProgress		 = true;
+	bEnablingMotionPlus	 = true;
 
 	// Initialize it:
 	WriteData(REGISTER_MOTIONPLUS_INIT  , 0x55);
@@ -1026,6 +1079,7 @@ bool wiimote::EnableMotionPlus ()
 	// Enable it (this maps it to the standard extension port):
 	WriteData(REGISTER_MOTIONPLUS_ENABLE, 0x04);
 //	Sleep(50);
+Sleep(500);
 	return true;
 	}
 // ------------------------------------------------------------------------------------
@@ -1049,10 +1103,15 @@ void wiimote::InitializeExtension ()
 	//  makes the extension type bytes unencrypted. This means that you no longer have
 	//  to decrypt the extension bytes using the transform listed above. 
 	bInitInProgress = true;
-
-	WriteData  (REGISTER_EXTENSION_INIT1, 0x55);
-	WriteData  (REGISTER_EXTENSION_INIT2, 0x00);
-	Sleep(100);
+_ASSERT(Internal.bExtension);
+	// only initialize if it's not a MotionPlus
+	if(!bEnablingMotionPlus) {
+		WriteData  (REGISTER_EXTENSION_INIT1, 0x55);
+		WriteData  (REGISTER_EXTENSION_INIT2, 0x00);
+		}
+	else
+		bEnablingMotionPlus = false;
+	
 	ReadAddress(REGISTER_EXTENSION_TYPE , 6);
 	}
 // ------------------------------------------------------------------------------------
@@ -1089,25 +1148,29 @@ int wiimote::ParseStatus (BYTE* buff)
 //		return changed;
 
 	bool extension = ((buff[3] & 0x02) != 0);
+//	TRACE(_T("(extension = %s)"), (extension? _T("TRUE") : _T("false")));
+
 	if(extension != Internal.bExtension)
 		{
 		if(!Internal.bExtension)
 			{
 			TRACE(_T("Extension connected:"));
+			Internal.bExtension = true;
 			InitializeExtension();
 			}
 		else{
 			TRACE(_T("Extension disconnected."));
+			Internal.bExtension	   = false;
 			Internal.ExtensionType = wiimote_state::NONE;
 			bMotionPlusEnabled	   = false;
 			bMotionPlusExtension   = false;
 			bMotionPlusDetected	   = false;
+			bInitInProgress		   = false;
+			bEnablingMotionPlus	   = false;
 			changed				  |= EXTENSION_DISCONNECTED;
 			// renable reports
-			SetReportType(ReportType);
+//			SetReportType(ReportType);
 			}
-		Internal.bExtension = extension;
-		bInitInProgress		= false;
 		}
 	
 	return changed;
@@ -1117,7 +1180,9 @@ int wiimote::ParseButtons (BYTE* buff)
 	{
 	int changed = 0;
 	
-	WORD bits = *(WORD*)(buff+1);
+//	WORD bits = *(WORD*)(buff+1);
+	WORD bits = *(WORD*)(buff+1) & Button.ALL;
+
 	if(bits != Internal.Button.Bits)
 		changed |= BUTTONS_CHANGED;
 	Internal.Button.Bits = bits;
@@ -1325,9 +1390,12 @@ inline float wiimote::GetBalanceValue (short sensor, short min, short mid, short
 	if(max == mid || mid == min)
 		return 0;
 
-	return (sensor < mid)?
-		68.0f * ((float)(sensor - min) / (mid - min)) :
-		68.0f * ((float)(sensor - mid) / (max - mid)) + 68.0f;
+	float val = (sensor < mid)?
+					68.0f * ((float)(sensor - min) / (mid - min)) :
+					68.0f * ((float)(sensor - mid) / (max - mid)) + 68.0f;
+	
+	// divide by four (so that each sensor is correct)
+	return val * 0.25f;
 	}
 // ------------------------------------------------------------------------------------
 int wiimote::ParseExtension (BYTE *buff, unsigned offset)
@@ -1536,10 +1604,10 @@ int wiimote::ParseExtension (BYTE *buff, unsigned offset)
 			Internal.BalanceBoard.Kg.BottomR -= BalanceBoard.AtRestKg.BottomR;
 
 			// compute the average
-			Internal.BalanceBoard.Kg.Total	 = (Internal.BalanceBoard.Kg.TopL    +
+			Internal.BalanceBoard.Kg.Total	  = Internal.BalanceBoard.Kg.TopL    +
 												Internal.BalanceBoard.Kg.TopR    +
 												Internal.BalanceBoard.Kg.BottomL +
-												Internal.BalanceBoard.Kg.BottomR) / 4.f;
+												Internal.BalanceBoard.Kg.BottomR;
 			// and convert to Lbs
 			const float KG2LB = 2.20462262f;
 			Internal.BalanceBoard.Lb		  = Internal.BalanceBoard.Kg;
@@ -1555,6 +1623,7 @@ int wiimote::ParseExtension (BYTE *buff, unsigned offset)
 			{
 			bMotionPlusDetected = true;
 			bMotionPlusEnabled  = true;
+
 			short yaw   = ((unsigned short)buff[offset+3] & 0xFC)<<6 |
 						   (unsigned short)buff[offset+0];
 			short pitch = ((unsigned short)buff[offset+5] & 0xFC)<<6 |
@@ -1576,9 +1645,9 @@ int wiimote::ParseExtension (BYTE *buff, unsigned offset)
 				raw.Roll  = roll;
 	
 				// convert to float values
-				bool    yaw_slow = (buff[offset+3] & 0x2);
-				bool  pitch_slow = (buff[offset+3] & 0x1);
-				bool   roll_slow = (buff[offset+4] & 0x2);
+				bool    yaw_slow = (buff[offset+3] & 0x2) == 0x2;
+				bool  pitch_slow = (buff[offset+3] & 0x1) == 0x1;
+				bool   roll_slow = (buff[offset+4] & 0x2) == 0x2;
 				float y_scale    =   yaw_slow? 0.05f : 0.25f;
 				float p_scale    = pitch_slow? 0.05f : 0.25f;
 				float r_scale    =  roll_slow? 0.05f : 0.25f;
@@ -1677,17 +1746,19 @@ int wiimote::ParseReadAddress (BYTE* buff)
 		case (REGISTER_EXTENSION_TYPE & 0xffff):
 			{
 			_ASSERT(size == 5);
-			unsigned __int64 type = *(unsigned __int64*)buff;
+			QWORD type = *(QWORD*)buff;
 
-			static const unsigned __int64 NUNCHUK		     = 0x000020A40000;
-			static const unsigned __int64 CLASSIC		     = 0x000020A40101;
-			static const unsigned __int64 GH3_GHWT_GUITAR    = 0x000020A40301;
-			static const unsigned __int64 GHWT_DRUMS	     = 0x000120A40301;
-			static const unsigned __int64 BALANCE_BOARD	     = 0x020420A40000;
-			static const unsigned __int64 MOTION_PLUS		 = 0x050420A40000;
-			static const unsigned __int64 MOTION_PLUS_DETECT = 0x050020a60000;
-			static const unsigned __int64 MOTION_PLUS_DETECT2= 0x050420a60000;
-			static const unsigned __int64 PARTIALLY_INSERTED = 0xffffffffffff;
+//			TRACE(_T("(found extension 0x%I64x)"), type);
+
+			static const QWORD NUNCHUK		       = 0x000020A40000ULL;
+			static const QWORD CLASSIC		       = 0x010120A40000ULL;
+			static const QWORD GH3_GHWT_GUITAR     = 0x030120A40000ULL;
+			static const QWORD GHWT_DRUMS	       = 0x030120A40001ULL;
+			static const QWORD BALANCE_BOARD	   = 0x020420A40000ULL;
+			static const QWORD MOTION_PLUS		   = 0x050420A40000ULL;
+			static const QWORD MOTION_PLUS_DETECT  = 0x050020a60000ULL;
+			static const QWORD MOTION_PLUS_DETECT2 = 0x050420a60000ULL;
+			static const QWORD PARTIALLY_INSERTED  = 0xffffffffffffULL;
 
 			// MotionPlus: _before_ it's been activated
 			if((type == MOTION_PLUS_DETECT) || (type == MOTION_PLUS_DETECT2))
@@ -1700,68 +1771,66 @@ int wiimote::ParseReadAddress (BYTE* buff)
 				--MotionPlusDetectCount;
 				break;
 				}
-			else{
-				#define IF_TYPE(id)	if(type == id) { \
-										/* sometimes it comes in more than once */ \
-										if(Internal.ExtensionType == wiimote_state::id)\
-											break; \
-										Internal.ExtensionType = wiimote_state::id;
-//			bMotionPlusDetected  = false;
 
-				// MotionPlus: once it's activated & mapped to the standard ext. port
-				IF_TYPE(MOTION_PLUS)
-					TRACE(_T(".. Motion Plus!"));
-					// and start a query for the calibration data
-					ReadAddress(REGISTER_EXTENSION_CALIBRATION, 16);
-					bMotionPlusDetected = true;
-					}
-				else IF_TYPE(NUNCHUK)
-					TRACE(_T(".. Nunchuk!"));
-					bMotionPlusEnabled = false;
-					// and start a query for the calibration data
-					ReadAddress(REGISTER_EXTENSION_CALIBRATION, 16);
-					}
-				else IF_TYPE(CLASSIC)
-					TRACE(_T(".. Classic Controller!"));
-					bMotionPlusEnabled = false;
-					// and start a query for the calibration data
-					ReadAddress(REGISTER_EXTENSION_CALIBRATION, 16);
-					}
-				else IF_TYPE(GH3_GHWT_GUITAR)
-					// sometimes it comes in more than once?
-					TRACE(_T(".. GH3/GHWT Guitar Controller!"));
-					bMotionPlusEnabled = false;
-					// and start a query for the calibration data
-					ReadAddress(REGISTER_EXTENSION_CALIBRATION, 16);
-					}
-				else IF_TYPE(GHWT_DRUMS)
-					TRACE(_T(".. GHWT Drums!"));
-					bMotionPlusEnabled = false;
-					// and start a query for the calibration data
-					ReadAddress(REGISTER_EXTENSION_CALIBRATION, 16);
-					}
-				else IF_TYPE(BALANCE_BOARD)
-					TRACE(_T(".. Balance Board!"));
-					bMotionPlusEnabled = false;
-					// and start a query for the calibration data
-					ReadAddress(REGISTER_BALANCE_CALIBRATION, 24);
-					}
-				else if(type == PARTIALLY_INSERTED) {
-					// sometimes it comes in more than once?
-					if(Internal.ExtensionType == wiimote_state::PARTIALLY_INSERTED)
-						Sleep(50);
-					TRACE(_T(".. partially inserted!"));
-					bMotionPlusEnabled = false;
-					Internal.ExtensionType = wiimote_state::PARTIALLY_INSERTED;
-					changed |= EXTENSION_PARTIALLY_INSERTED;
-					// try initializing the extension again by requesting another
-					//  status report (this usually fixes it)
-					Internal.bExtension = false;
-					RequestStatusReport();
-					}
-				else{
-					TRACE(_T("unknown extension controller found (0x%x)"), type);
-					}
+			#define IF_TYPE(id)	if(type == id) { \
+									/* sometimes it comes in more than once */ \
+									if(Internal.ExtensionType == wiimote_state::id)\
+										break; \
+									Internal.ExtensionType = wiimote_state::id;
+
+			// MotionPlus: once it's activated & mapped to the standard ext. port
+			IF_TYPE(MOTION_PLUS)
+				TRACE(_T(".. Motion Plus!"));
+				// and start a query for the calibration data
+				ReadAddress(REGISTER_EXTENSION_CALIBRATION, 16);
+				bMotionPlusDetected = true;
+				}
+			else IF_TYPE(NUNCHUK)
+				TRACE(_T(".. Nunchuk!"));
+				bMotionPlusEnabled = false;
+				// and start a query for the calibration data
+				ReadAddress(REGISTER_EXTENSION_CALIBRATION, 16);
+				}
+			else IF_TYPE(CLASSIC)
+				TRACE(_T(".. Classic Controller!"));
+				bMotionPlusEnabled = false;
+				// and start a query for the calibration data
+				ReadAddress(REGISTER_EXTENSION_CALIBRATION, 16);
+				}
+			else IF_TYPE(GH3_GHWT_GUITAR)
+				// sometimes it comes in more than once?
+				TRACE(_T(".. GH3/GHWT Guitar Controller!"));
+				bMotionPlusEnabled = false;
+				// and start a query for the calibration data
+				ReadAddress(REGISTER_EXTENSION_CALIBRATION, 16);
+				}
+			else IF_TYPE(GHWT_DRUMS)
+				TRACE(_T(".. GHWT Drums!"));
+				bMotionPlusEnabled = false;
+				// and start a query for the calibration data
+				ReadAddress(REGISTER_EXTENSION_CALIBRATION, 16);
+				}
+			else IF_TYPE(BALANCE_BOARD)
+				TRACE(_T(".. Balance Board!"));
+				bMotionPlusEnabled = false;
+				// and start a query for the calibration data
+				ReadAddress(REGISTER_BALANCE_CALIBRATION, 24);
+				}
+			else if(type == PARTIALLY_INSERTED) {
+				// sometimes it comes in more than once?
+				if(Internal.ExtensionType == wiimote_state::PARTIALLY_INSERTED)
+					Sleep(50);
+				TRACE(_T(".. partially inserted!"));
+				bMotionPlusEnabled = false;
+				Internal.ExtensionType = wiimote_state::PARTIALLY_INSERTED;
+				changed |= EXTENSION_PARTIALLY_INSERTED;
+				// try initializing the extension again by requesting another
+				//  status report (this usually fixes it)
+				Internal.bExtension = false;
+				RequestStatusReport();
+				}
+			else{
+				TRACE(_T("unknown extension controller found (0x%I64x)"), type);
 				}
 			}
 			break;
@@ -1794,7 +1863,7 @@ int wiimote::ParseReadAddress (BYTE* buff)
 
 					changed |= NUNCHUK_CONNECTED;//|NUNCHUK_CALIBRATION_CHANGED;
 					// reenable reports
-					SetReportType(ReportType);
+//					SetReportType(ReportType);
 					}
 					break;
 				
@@ -1829,7 +1898,7 @@ int wiimote::ParseReadAddress (BYTE* buff)
 
 					changed |= CLASSIC_CONNECTED;//|CLASSIC_CALIBRATION_CHANGED;
 					// reenable reports
-					SetReportType(ReportType);
+//					SetReportType(ReportType);
 					}
 					break;
 
@@ -1839,23 +1908,15 @@ int wiimote::ParseReadAddress (BYTE* buff)
 					wiimote_state::balance_board::calibration_info
 						&calib = Internal.BalanceBoard.CalibrationInfo;
 
-					Internal.BalanceBoard.CalibrationInfo.Kg0 .TopR	   =
-									(short)((short)buff[0] << 8 | buff[1]);
-					Internal.BalanceBoard.CalibrationInfo.Kg0 .BottomR =
-									(short)((short)buff[2] << 8 | buff[3]);
-					Internal.BalanceBoard.CalibrationInfo.Kg0 .TopL	   =
-									(short)((short)buff[4] << 8 | buff[5]);
-					Internal.BalanceBoard.CalibrationInfo.Kg0 .BottomL =
-									(short)((short)buff[6] << 8 | buff[7]);
+					calib.Kg0 .TopR	   = (short)((short)buff[0] << 8 | buff[1]);
+					calib.Kg0 .BottomR = (short)((short)buff[2] << 8 | buff[3]);
+					calib.Kg0 .TopL	   = (short)((short)buff[4] << 8 | buff[5]);
+					calib.Kg0 .BottomL = (short)((short)buff[6] << 8 | buff[7]);
 
-					Internal.BalanceBoard.CalibrationInfo.Kg17.TopR	   =
-									(short)((short)buff[8] << 8 | buff[9]);
-					Internal.BalanceBoard.CalibrationInfo.Kg17.BottomR =
-									(short)((short)buff[10] << 8 | buff[11]);
-					Internal.BalanceBoard.CalibrationInfo.Kg17.TopL	   =
-									(short)((short)buff[12] << 8 | buff[13]);
-					Internal.BalanceBoard.CalibrationInfo.Kg17.BottomL =
-									(short)((short)buff[14] << 8 | buff[15]);
+					calib.Kg17.TopR	   = (short)((short)buff[8] << 8 | buff[9]);
+					calib.Kg17.BottomR = (short)((short)buff[10] << 8 | buff[11]);
+					calib.Kg17.TopL	   = (short)((short)buff[12] << 8 | buff[13]);
+					calib.Kg17.BottomL = (short)((short)buff[14] << 8 | buff[15]);
 
 					// 2nd part is scanned above
 					}
@@ -1866,8 +1927,9 @@ int wiimote::ParseReadAddress (BYTE* buff)
 					// TODO: not known how the calibration values work
 					changed |= MOTIONPLUS_ENABLED;
 					bMotionPlusEnabled = true;
+					bInitInProgress	   = false;
 					// reenable reports
-					SetReportType(ReportType);
+//					SetReportType(ReportType);
 					}
 					break;
 				}
@@ -1875,16 +1937,15 @@ int wiimote::ParseReadAddress (BYTE* buff)
 				{
 				if(Internal.ExtensionType == BALANCE_BOARD)
 					{
+					wiimote_state::balance_board::calibration_info
+						&calib = Internal.BalanceBoard.CalibrationInfo;
+
 					// 2nd part of the balance board calibration,
 					//  34kg calibration values
-					Internal.BalanceBoard.CalibrationInfo.Kg34.TopR    =
-									(short)((short)buff[0] << 8 | buff[1]);
-					Internal.BalanceBoard.CalibrationInfo.Kg34.BottomR =
-									(short)((short)buff[2] << 8 | buff[3]);
-					Internal.BalanceBoard.CalibrationInfo.Kg34.TopL   =
-									(short)((short)buff[4] << 8 | buff[5]);
-					Internal.BalanceBoard.CalibrationInfo.Kg34.BottomL =
-									(short)((short)buff[6] << 8 | buff[7]);
+					calib.Kg34.TopR    = (short)((short)buff[0] << 8 | buff[1]);
+					calib.Kg34.BottomR = (short)((short)buff[2] << 8 | buff[3]);
+					calib.Kg34.TopL    = (short)((short)buff[4] << 8 | buff[5]);
+					calib.Kg34.BottomL = (short)((short)buff[6] << 8 | buff[7]);
 						
 					changed |= BALANCE_CONNECTED;
 					// reenable reports
@@ -1960,20 +2021,32 @@ unsigned __stdcall wiimote::HIDwriteThreadfunc (void* param)
 	while(remote.Handle != INVALID_HANDLE_VALUE)
 		{
 		// try to write the oldest entry in the queue
+#ifdef USE_DYNAMIC_HIDQUEUE
 		if(!remote.HIDwriteQueue.empty())
+#else
+		if(!remote.HID.IsEmpty())
+#endif
 			{
 #ifdef BEEP_DEBUG_WRITES
 			Beep(1500,1);
 #endif
 			EnterCriticalSection(&remote.HIDwriteQueueLock);
+#ifdef USE_DYNAMIC_HIDQUEUE
 			 BYTE *buff = remote.HIDwriteQueue.front();
+			 _ASSERT(buff);
+#else
+			 BYTE *buff = remote.HID.Queue[remote.HID.ReadIndex].Report;
+#endif
 			LeaveCriticalSection(&remote.HIDwriteQueueLock);
-
-			_ASSERT(buff);
 
 			if(!_HidD_SetOutputReport(remote.Handle, buff, REPORT_LENGTH))
 				{
 				DWORD err = GetLastError();
+if(err==ERROR_BUSY)
+TRACE(_T("**** HID WRITE: BUSY ****"));
+else if(err == ERROR_NOT_READY)
+TRACE(_T("**** HID WRITE: NOT READY ****"));
+
 				if((err != ERROR_BUSY)	&&	 // "the requested resource is in use"
 				   (err != ERROR_NOT_READY)) // "the device is not ready"
 					{
@@ -1982,21 +2055,25 @@ unsigned __stdcall wiimote::HIDwriteThreadfunc (void* param)
 						goto remove_entry;
 						}
 					else{
-						DEEP_TRACE(_T("HID write to Wiimote failed (err %u)! - "), err);
+						DEEP_TRACE(_T("HID write failed (err %u)! - "), err);
 						// if this worked previously, the connection was probably lost
 						if(remote.IsConnected())
 							remote.bConnectionLost = true;
 						}
-
 					//_T("aborting write thread"), err);
 					//return 911;
 					}
 				}
 			else{
 remove_entry:
-				delete[] buff;
 				EnterCriticalSection(&remote.HIDwriteQueueLock);
+#ifdef USE_DYNAMIC_HIDQUEUE
 				 remote.HIDwriteQueue.pop();
+				 delete[] buff;
+#else
+				 remote.HID.ReadIndex++;
+				 remote.HID.ReadIndex &= (hid::MAX_QUEUE_ENTRIES-1);
+#endif
 				LeaveCriticalSection(&remote.HIDwriteQueueLock);
 				}
 			}
@@ -2011,6 +2088,27 @@ bool wiimote::WriteReport (BYTE *buff)
 	{
 #ifdef BEEP_DEBUG_WRITES
 	Beep(2000,1);
+#endif
+
+#ifdef _DEBUG
+	#define DEEP_TRACE_TYPE(type)	case OUT_##type: DEEP_TRACE(_T("WriteReport: ")\
+																_T(#type)); break
+	switch(buff[0])
+		{
+		DEEP_TRACE_TYPE(NONE);
+		DEEP_TRACE_TYPE(LEDs);
+		DEEP_TRACE_TYPE(TYPE);
+		DEEP_TRACE_TYPE(IR);
+		DEEP_TRACE_TYPE(SPEAKER_ENABLE);
+		DEEP_TRACE_TYPE(STATUS);
+		DEEP_TRACE_TYPE(WRITEMEMORY);
+		DEEP_TRACE_TYPE(READMEMORY);
+		DEEP_TRACE_TYPE(SPEAKER_DATA);
+		DEEP_TRACE_TYPE(SPEAKER_MUTE);
+		DEEP_TRACE_TYPE(IR2);
+		default:
+			TRACE(_T("WriteReport: type [%02x][%02x]"), buff[1], buff[2]);
+		}
 #endif
 
 	if(bUseHIDwrite)
@@ -2028,20 +2126,44 @@ bool wiimote::WriteReport (BYTE *buff)
 				}
 			SetThreadPriority(HIDwriteThread, WORKER_THREAD_PRIORITY);
 			}
+
 		// insert the write request into the thread's queue
-		BYTE *buff_copy = new BYTE[REPORT_LENGTH];
-		_ASSERT(buff_copy);
-		memcpy(buff_copy, buff, REPORT_LENGTH);
+#ifdef USE_DYNAMIC_HIDQUEUE
+		EnterCriticalSection(&HIDwriteQueueLock);
+		 BYTE *buff_copy = new BYTE[REPORT_LENGTH];
+#else
+		// allocate the HID write queue once
+		if(!HID.Queue && !HID.Allocate())
+			return false;
 
 		EnterCriticalSection(&HIDwriteQueueLock);
+		 BYTE *buff_copy = HID.Queue[HID.WriteIndex].Report;
+#endif
+		 memcpy(buff_copy, buff, REPORT_LENGTH);
+
+#ifdef USE_DYNAMIC_HIDQUEUE
 		 HIDwriteQueue.push(buff_copy);
+#else
+		 HID.WriteIndex++;
+		 HID.WriteIndex &= (HID.MAX_QUEUE_ENTRIES-1);
+
+		 // check if the fixed report queue has overflown:
+		 //  if this ASSERT triggers, the HID write queue (that stores reports
+		 //   for asynchronous output by HIDwriteThreadfunc) has overflown.
+		 //  this can happen if the connection with the wiimote has been lost
+		 //   and in that case is harmless.
+		 //
+		 //  if it happens during normal operation though you need to increase
+		 //   hid::MAX_QUEUE_ENTRIES to the next power-of-2 (see comments)
+		 //   _and_ email me the working setting so I can update the next release
+		 _ASSERT(HID.WriteIndex != HID.ReadIndex);
+#endif
 		LeaveCriticalSection(&HIDwriteQueueLock);
 		return true;
 		}
 
 	// WriteFile:
 	DWORD written;
-	// have we been asked to cancel any pending IO
 	if(!WriteFile(Handle, buff, REPORT_LENGTH, &written, &Overlapped))
 		{
 		DWORD error = GetLastError();
@@ -2050,6 +2172,9 @@ bool wiimote::WriteReport (BYTE *buff)
 			// if it worked previously, assume we lost the connection
 			if(IsConnected())
 				bConnectionLost = true;
+#ifndef USE_DYNAMIC_HIDQUEUE
+			HID.Deallocate();
+#endif
 			return false;
 			}
 		}

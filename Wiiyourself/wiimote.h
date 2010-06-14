@@ -1,7 +1,7 @@
 // _______________________________________________________________________________
 //
-//	 - WiiYourself! - native C++ Wiimote library  v1.15 RC2
-//	  (c) gl.tter 2007-9 - http://gl.tter.org
+//	 - WiiYourself! - native C++ Wiimote library  v1.15
+//	  (c) gl.tter 2007-10 - http://gl.tter.org
 //
 //	  see License.txt for conditions of use.  see History.txt for change log.
 // _______________________________________________________________________________
@@ -21,6 +21,10 @@
 #include <queue>		// for HID write method
 #include <list>			// for state recording
  
+#ifndef QWORD
+ typedef unsigned __int64 QWORD;
+#endif
+
 #ifdef _MSC_VER			   // VC-specific: _DEBUG build only _ASSERT() sanity checks
 # include <crtdbg.h>
 #elif defined(__MINGW32__) // define NDEBUG to disable assert
@@ -37,11 +41,13 @@
 #endif
 
 // configs:
- //  we request periodic status report updates to refresh the battery level
+//#define USE_DYNAMIC_HIDQUEUE // deprecated
+
+//  we request periodic status report updates to refresh the battery level
 //   and to detect connection loss (through failed writes)
 #define REQUEST_STATUS_EVERY_MS		1000
 #define DETECT_MPLUS_EVERY_MS		1000
-#define DETECT_MPLUS_COUNT			3	 // # of tries in quick succession
+#define DETECT_MPLUS_COUNT			1	 // # of tries in quick succession
 
 //  all threads (read/parse, audio streaming, async rumble...) use this priority
 #define WORKER_THREAD_PRIORITY		THREAD_PRIORITY_HIGHEST
@@ -50,8 +56,8 @@
 #define	WIIYOURSELF_VERSION_MAJOR	1
 #define	WIIYOURSELF_VERSION_MINOR1	1
 #define	WIIYOURSELF_VERSION_MINOR2	5
-#define WIIYOURSELF_VERSION_BETA	// undefined for non-beta releases
-#define WIIYOURSELF_VERSION_STR		_T("1.15 RC2 ")
+//#define WIIYOURSELF_VERSION_BETA	// not defined for non-beta releases
+#define WIIYOURSELF_VERSION_STR		_T("1.15")
 
 // array sizes
 #define	TOTAL_BUTTON_BITS	16	// Number of bits for (Classic)ButtonNameFromBit[]
@@ -87,7 +93,7 @@ class wiimote : public wiimote_state
 	{
 	public:
 		wiimote ();
-		~wiimote ();
+		virtual ~wiimote ();
 
 	public:
 		// these can be used to identify Connect()ed wiimote objects (if both
@@ -137,6 +143,18 @@ class wiimote : public wiimote_state
 
 
 	public: // data
+		QWORD UniqueID;		   // constructed from device-specific calibration info.
+							   //  Note this is not guaranteed to be truly unique
+							   //  as several devices may contain the same calibration
+							   //  vluaes - but unique amongst a small number of 
+							   //  devices.
+#ifdef ID2_FROM_DEVICEPATH
+		QWORD UniqueID2;	   // (low-reliabilty, left for reference)
+							   //  constructed from the 'device path' string (as
+							   //  reported by the OS/stack).  This is hopefully
+							   //  unique as long as the devices remain installed
+							   //  (or at least paired).
+#endif
 		// optional callbacks - set these to your own fuctions (if required)
 		state_changed_callback  ChangedCallback;
 		//  you can avoid unnecessary callback overhead by specifying a mask
@@ -385,6 +403,7 @@ class wiimote : public wiimote_state
 		volatile bool	 bStatusReceived;	  // for output method detection
 		volatile bool	 bConnectInProgress;  // don't handle extensions until complete
 		volatile bool	 bInitInProgress;	  // stop regular requests until complete
+		volatile bool	 bEnablingMotionPlus; // for special init codepath
 		volatile bool	 bConnectionLost;	  // auto-Disconnect()s if set
 volatile int	 MotionPlusDetectCount;		  // waiting for the result
 		volatile bool	 bMotionPlusDetected;
@@ -408,8 +427,50 @@ volatile int	 MotionPlusDetectCount;		  // waiting for the result
 		DWORD			  MPlusDetectCount;	  // # of detection tries in quick succesion
 		// async Hidd_WriteReport() thread
 		HANDLE			  HIDwriteThread;
+#ifdef USE_DYNAMIC_HIDQUEUE
 		std::queue<BYTE*> HIDwriteQueue;
-		CRITICAL_SECTION  HIDwriteQueueLock;  // queue must be locked before being modified
+#else
+		// fixed-size queue (to eliminate glitches caused by frequent dynamic memory
+		//	allocations)
+		struct hid
+			{
+			hid () : Queue(NULL), ReadIndex(0), WriteIndex(0) {}
+
+			// Increase the static queue size if you get ASSERTs signalling an
+			//  overflow (too many reports queued up before being sent by the write
+			//  thread).  These asserts are harmless though if caused as a result of
+			//  loosing the wiimote connection (eg. battery runs out, or wiimote is
+			//  unpaired by holding the power button).
+			// Note: MAX_QUEUE_ENTRIES _must_ be a power-of-2, as it
+			//  uses index wraparound optimisations.
+			static const unsigned MAX_QUEUE_ENTRIES = 1<<7;
+		
+			inline bool IsEmpty() const { return (ReadIndex == WriteIndex); }
+
+			bool Allocate	()	{ // allocate memory (only when needed)
+								_ASSERT(!Queue); if(Queue) return true;
+								ReadIndex = WriteIndex = 0;
+								Queue = new queue_entry[MAX_QUEUE_ENTRIES];
+								_ASSERT(Queue); return (Queue != NULL);
+								}
+			void Deallocate ()	{
+								if(!Queue) return;
+								delete[] Queue; Queue = NULL;
+								ReadIndex = WriteIndex = 0;
+								}
+								
+			struct queue_entry
+				{
+				queue_entry() { memset(Report, 0, sizeof(Report)); }
+				
+				BYTE Report [REPORT_LENGTH];
+				} *Queue;
+			
+			unsigned ReadIndex, WriteIndex;
+			} HID;
+#endif
+		CRITICAL_SECTION  HIDwriteQueueLock;  // queue must be locked before being  modified
+
 		// async rumble
 		HANDLE			 AsyncRumbleThread;	  // automatically disables rumble if requested
 		volatile DWORD	 AsyncRumbleTimeout;
